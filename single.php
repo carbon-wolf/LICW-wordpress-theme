@@ -21,10 +21,10 @@ get_header();
                     <?php
                     $tag = li_cw_get_blog_tag( get_the_ID() );
                     if ( $tag ) echo ' · ' . esc_html( $tag );
-                    $categories = get_the_category();
-                    if ( $categories ) {
-                        foreach ( $categories as $cat ) {
-                            echo ' · <a href="' . esc_url( get_category_link( $cat->term_id ) ) . '" class="single-cat-link">' . esc_html( $cat->name ) . '</a>';
+                    $tags = get_the_tags();
+                    if ( $tags ) {
+                        foreach ( $tags as $tag_obj ) {
+                            echo ' · <a href="' . esc_url( get_tag_link( $tag_obj->term_id ) ) . '" class="single-cat-link">' . esc_html( $tag_obj->name ) . '</a>';
                         }
                     }
                     ?>
