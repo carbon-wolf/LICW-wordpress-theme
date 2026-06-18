@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // 主题版本号，用于缓存刷新
-define( 'LI_CW_VERSION', '1.0.1' );
+define( 'LI_CW_VERSION', '1.0.5' );
 define( 'LI_CW_THEME_DIR', get_template_directory() );
 define( 'LI_CW_THEME_URI', get_template_directory_uri() );
 
