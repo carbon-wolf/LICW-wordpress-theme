@@ -11,7 +11,7 @@ $cat = get_post_meta( $post_id, 'li_cw_project_cat', true );
 $external_link = get_post_meta( $post_id, 'li_cw_project_link', true );
 $link = $external_link ? $external_link : get_the_permalink();
 ?>
-<article class="project-card">
+<article class="project-card reveal">
     <a href="<?php echo esc_url( $link ); ?>" <?php if ( $external_link ) echo 'target="_blank" rel="noopener"'; ?>>
         <div class="project-thumb">
             <?php if ( has_post_thumbnail() ) : ?>

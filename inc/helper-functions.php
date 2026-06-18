@@ -24,14 +24,14 @@ function li_cw_get_option( $key, $default = '' ) {
 function li_cw_get_custom_css() {
     $css = '';
 
-    // 读取配色
-    $bg_page = li_cw_get_option( 'li_cw_bg_page', '#f8f6f1' );
-    $bg_card = li_cw_get_option( 'li_cw_bg_card', '#ffffff' );
-    $text_primary = li_cw_get_option( 'li_cw_text_primary', '#1f1f1f' );
-    $text_secondary = li_cw_get_option( 'li_cw_text_secondary', '#666666' );
-    $accent = li_cw_get_option( 'li_cw_accent', '#1a3a32' );
-    $accent_gold = li_cw_get_option( 'li_cw_accent_gold', '#b89a5c' );
-    $border = li_cw_get_option( 'li_cw_border', '#e8e4db' );
+    // 读取配色 — OKLCH 默认值
+    $bg_page = li_cw_get_option( 'li_cw_bg_page', 'oklch(97.5% 0.005 95)' );
+    $bg_card = li_cw_get_option( 'li_cw_bg_card', 'oklch(99% 0.003 95)' );
+    $text_primary = li_cw_get_option( 'li_cw_text_primary', 'oklch(15% 0.005 170)' );
+    $text_secondary = li_cw_get_option( 'li_cw_text_secondary', 'oklch(48% 0.005 170)' );
+    $accent = li_cw_get_option( 'li_cw_accent', 'oklch(30% 0.055 170)' );
+    $accent_gold = li_cw_get_option( 'li_cw_accent_gold', 'oklch(68% 0.09 82)' );
+    $border = li_cw_get_option( 'li_cw_border', 'oklch(91% 0.008 95)' );
 
     // 读取字体
     $font_display = li_cw_get_option( 'li_cw_font_display' );
@@ -50,8 +50,8 @@ function li_cw_get_custom_css() {
     $css .= "--accent-gold: {$accent_gold};";
     $css .= "--border-color: {$border};";
 
-    // 字体变量
-    if ( $font_display ) $css .= "--font-display: {$font_display};";
+    // 字体变量 — display 已合并入 heading
+    if ( $font_display ) $css .= "--font-heading: {$font_display};";
     if ( $font_heading ) $css .= "--font-heading: {$font_heading};";
     if ( $font_body ) $css .= "--font-body: {$font_body};";
     if ( $font_ui ) $css .= "--font-ui: {$font_ui};";

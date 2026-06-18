@@ -16,14 +16,19 @@
 - 极简优雅的视觉风格，专注内容本身
 - 🌓 明暗双模式无缝切换，自动跟随系统偏好
 - 📱 全响应式适配，桌面/平板/手机完美显示
+- 🍔 移动端汉堡菜单，小屏导航不拥挤
 - 完整的字体层级体系，支持自定义字体栈
 - 全站配色可视化自定义，无需改代码
+- OKLCH 知觉均匀色彩体系，亮暗模式自动适配
+- 页面入场动画编排，滚动揭示，弱动偏好保护
 
 ### 📝 创作功能
 - 独立「作品」自定义文章类型，作品集与博客分离
 - 内置友链页面，无限添加，原生链接管理器
 - 关于页个人信息卡 + 自由长文双区域
 - 精简弹窗式评论区，支持昵称/邮箱/网址
+- 文章分类标签，内联于标题栏
+- 双重线框引用块，古典书籍排版风格
 - 文章上下篇导航，阅读体验连贯
 - 代码块增强：语法高亮、行号显示、一键复制
 
@@ -62,8 +67,8 @@
 ### 3. 可视化自定义
 后台 → 外观 → 自定义，可配置全部内容：
 - **首页设置**：欢迎语、大标题、副标题、描述、按钮、主视觉图
-- **配色设置**：全站背景、文字、强调色、边框色自定义
-- **字体设置**：大标题/正文/界面/点缀四级字体栈自定义
+- **配色设置**：全站背景、文字、强调色、边框色自定义（支持 OKLCH）
+- **字体设置**：标题/正文/界面/点缀四级字体栈自定义
 - **关于页设置**：头像、昵称、身份、简介、社交链接
 - **页脚设置**：版权信息、ICP备案号、隐私政策链接
 - **友链设置**：通过后台「链接」菜单管理，数量无上限
@@ -88,45 +93,64 @@
 - 自动生成行号、一键复制按钮，明暗模式自动适配配色
 
 ## 📁 文件结构
-'''
+```
 li-cw-theme/
-├── style.css # 主题入口 + 全局样式
-├── functions.php # 主题函数入口
-├── index.php # 兜底模板（必备）
-├── front-page.php # 首页模板
-├── archive.php # 日志归档页
-├── single.php # 单篇文章页
-├── page.php # 默认页面模板
-├── page-projects.php # 作品列表页模板
-├── page-about.php # 关于页模板
-├── page-links.php # 友链页面模板
-├── 404.php # 404 错误页
-├── search.php # 搜索结果页
-├── comments.php # 精简评论模板
-├── header.php # 页面头部入口
-├── footer.php # 页面底部入口
-├── screenshot.png # 主题预览图
-├── README.md # 使用文档
+├── style.css                 # 主题入口 + 全局样式
+├── functions.php             # 主题函数入口
+├── index.php                 # 兜底模板（必备）
+├── front-page.php            # 首页模板
+├── archive.php               # 日志归档页
+├── single.php                # 单篇文章页
+├── page.php                  # 默认页面模板
+├── page-projects.php         # 作品列表页模板
+├── page-about.php            # 关于页模板
+├── page-links.php            # 友链页面模板
+├── 404.php                   # 404 错误页
+├── search.php                # 搜索结果页
+├── comments.php              # 精简评论模板
+├── header.php                # 页面头部入口
+├── footer.php                # 页面底部入口
+├── screenshot.png            # 主题预览图
+├── README.md                 # 使用文档
 ├── assets/
-│ ├── js/
-│ │ ├── darkmode.js # 暗色模式逻辑
-│ │ ├── main.js # 全局交互
-│ │ └── highlight.min.js # 代码高亮核心
-│ └── images/ # 占位图目录
-├── inc/ # 功能模块
-│ ├── theme-support.php # 主题基础功能
-│ ├── customizer.php # 后台自定义器配置
-│ ├── cpt-project.php # 作品自定义文章类型
-│ ├── performance.php # 性能优化
-│ ├── code-highlight.php # 代码高亮模块
-│ └── helper-functions.php # 全局工具函数
-└── template-parts/ # 可复用模板部件
-├── header-main.php # 顶部导航栏
-├── footer-main.php # 页脚
-├── hero-home.php # 首页主视觉
-├── card-blog.php # 日志卡片
-└── card-project.php # 作品卡片
-'''
+│   ├── js/
+│   │   ├── darkmode.js       # 暗色模式逻辑
+│   │   ├── main.js           # 全局交互
+│   │   └── highlight.min.js  # 代码高亮核心
+│   └── images/               # 占位图目录
+├── inc/                      # 功能模块
+│   ├── theme-support.php     # 主题基础功能
+│   ├── customizer.php        # 后台自定义器配置
+│   ├── cpt-project.php       # 作品自定义文章类型
+│   ├── performance.php       # 性能优化
+│   ├── code-highlight.php    # 代码高亮模块
+│   └── helper-functions.php  # 全局工具函数
+└── template-parts/           # 可复用模板部件
+    ├── header-main.php       # 顶部导航栏
+    ├── footer-main.php       # 页脚
+    ├── hero-home.php         # 首页主视觉
+    ├── card-blog.php         # 日志卡片
+    └── card-project.php      # 作品卡片
+```
+
+## 📋 更新日志
+
+### v1.1.0
+- 字体系统重构：全站衬线体系（Alegreya + 思源宋体 + 霞鹜文楷），替换 Inter/Cormorant Garamond
+- 色彩系统升级：hex → OKLCH 知觉均匀色彩，中性灰向品牌绿微调，新增语义状态色
+- 间距体系：4pt 语义间距 Token（--space-xs ~ --space-3xl）
+- 引用块重设计：双重线框 + 金色菱形角标，古典书籍排版风格，亮暗双模式适配
+- 文章标题栏对齐正文栏，新增内联分类标签
+- 关于页金线分隔装饰
+- 移动端汉堡菜单（三横线 → X 动画）
+- 移动端全面排版打磨
+- 页面入场动画编排（Hero 级联淡入）+ 滚动揭示 + prefers-reduced-motion 保护
+- 博客卡片 hover 平移 + 金色交互反馈
+- 正文栏 65ch → 70ch，桌面阅读更舒适
+
+### v1.0.5
+- 初始版本
+
 ## ❓ 常见问题
 
 ### Q：「查看所有日志」点击没反应？

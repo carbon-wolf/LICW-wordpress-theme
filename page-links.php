@@ -40,7 +40,7 @@ get_header();
                     <?php if ( $link->link_image ) : ?>
                         <img src="<?php echo esc_url( $link->link_image ); ?>" alt="<?php echo esc_attr( $link->link_name ); ?>" class="link-avatar">
                     <?php else : ?>
-                        <div class="link-avatar" style="background: var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); font-family: var(--font-display); font-weight: 600;">
+                        <div class="link-avatar" style="background: var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); font-family: var(--font-heading); font-weight: 600;">
                             <?php echo mb_substr( $link->link_name, 0, 1 ); ?>
                         </div>
                     <?php endif; ?>

@@ -21,8 +21,8 @@ get_header();
 
         if ( $latest_posts->have_posts() ) :
         ?>
-        <section class="home-latest-posts" id="latest-posts">
-            <h2 class="section-title">
+        <section class="home-section home-latest-posts" id="latest-posts">
+            <h2 class="section-title reveal">
                 <span><?php esc_html_e( '最新日志', 'li-cw' ); ?></span>
                 <?php
                 // 读取后台文章页配置，无配置则返回首页
@@ -58,8 +58,8 @@ get_header();
 
         if ( $projects->have_posts() ) :
         ?>
-        <section class="home-featured-projects" id="projects" style="margin-top: 60px;">
-            <h2 class="section-title">
+        <section class="home-section home-featured-projects" id="projects">
+            <h2 class="section-title reveal">
                 <span><?php esc_html_e( '精选作品', 'li-cw' ); ?></span>
                 <a href="<?php echo esc_url( get_post_type_archive_link( 'project' ) ); ?>" class="more-link">
                     <?php esc_html_e( '查看所有作品 →', 'li-cw' ); ?>

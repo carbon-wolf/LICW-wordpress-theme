@@ -11,3 +11,8 @@ __MACOSX
 # 压缩包（源码仓库不放安装包）
 *.zip
 *.rar
+
+# Claude Code 辅助文件
+CLAUDE.md
+.design-context.md
+.claude/

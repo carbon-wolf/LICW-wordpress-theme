@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // 主题版本号，用于缓存刷新
-define( 'LI_CW_VERSION', '1.0.5' );
+define( 'LI_CW_VERSION', '1.1.0' );
 define( 'LI_CW_THEME_DIR', get_template_directory() );
 define( 'LI_CW_THEME_URI', get_template_directory_uri() );
 
@@ -33,6 +33,14 @@ function li_cw_enqueue_assets() {
     // 主样式表
     wp_enqueue_style( 'li-cw-style', get_stylesheet_uri(), array(), LI_CW_VERSION );
 
+    // Google Fonts — 仅加载实际使用的字重
+    wp_enqueue_style(
+        'li-cw-fonts',
+        'https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,500;0,700;1,400;1,500&family=LXGW+WenKai&family=Noto+Serif+SC:wght@400;500;700&family=JetBrains+Mono:wght@400&display=swap',
+        array(),
+        null
+    );
+
     // 主交互脚本 - 页脚加载，不阻塞渲染
     wp_enqueue_script( 'li-cw-main', LI_CW_THEME_URI . '/assets/js/main.js', array(), LI_CW_VERSION, true );
 
@@ -42,6 +50,6 @@ function li_cw_enqueue_assets() {
     // 将自定义器配色输出到内联CSS
     $custom_css = li_cw_get_custom_css();
     wp_add_inline_style( 'li-cw-style', $custom_css );
-    
+
 }
 add_action( 'wp_enqueue_scripts', 'li_cw_enqueue_assets' );

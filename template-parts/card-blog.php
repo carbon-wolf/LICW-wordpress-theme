@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 $post_id = get_the_ID();
 $tag = li_cw_get_blog_tag( $post_id );
 ?>
-<article class="blog-card">
+<article class="blog-card reveal">
     <div class="blog-card-date">
         <div><?php echo get_the_date( 'm/d' ); ?></div>
         <div class="year"><?php echo get_the_date( 'Y' ); ?></div>

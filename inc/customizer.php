@@ -142,19 +142,19 @@ function li_cw_register_customizer( $wp_customize ) {
     ));
 
     $colors = array(
-        'li_cw_bg_page'      => array( 'label' => '页面背景色', 'default' => '#f8f6f1' ),
-        'li_cw_bg_card'      => array( 'label' => '卡片背景色', 'default' => '#ffffff' ),
-        'li_cw_text_primary' => array( 'label' => '主文字色', 'default' => '#1f1f1f' ),
-        'li_cw_text_secondary' => array( 'label' => '辅助文字色', 'default' => '#666666' ),
-        'li_cw_accent'       => array( 'label' => '主强调色', 'default' => '#1a3a32' ),
-        'li_cw_accent_gold'  => array( 'label' => '金色辅助色', 'default' => '#b89a5c' ),
-        'li_cw_border'       => array( 'label' => '边框分割线色', 'default' => '#e8e4db' ),
+        'li_cw_bg_page'      => array( 'label' => '页面背景色', 'default' => 'oklch(97.5% 0.005 95)' ),
+        'li_cw_bg_card'      => array( 'label' => '卡片背景色', 'default' => 'oklch(99% 0.003 95)' ),
+        'li_cw_text_primary' => array( 'label' => '主文字色', 'default' => 'oklch(15% 0.005 170)' ),
+        'li_cw_text_secondary' => array( 'label' => '辅助文字色', 'default' => 'oklch(48% 0.005 170)' ),
+        'li_cw_accent'       => array( 'label' => '主强调色', 'default' => 'oklch(30% 0.055 170)' ),
+        'li_cw_accent_gold'  => array( 'label' => '金色辅助色', 'default' => 'oklch(68% 0.09 82)' ),
+        'li_cw_border'       => array( 'label' => '边框分割线色', 'default' => 'oklch(91% 0.008 95)' ),
     );
 
     foreach ( $colors as $key => $setting ) {
         $wp_customize->add_setting( $key, array(
             'default'           => $setting['default'],
-            'sanitize_callback' => 'sanitize_hex_color',
+            'sanitize_callback' => 'sanitize_text_field',
         ));
         $wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, $key, array(
             'section' => 'li_cw_section_colors',
@@ -378,21 +378,21 @@ function li_cw_register_customizer( $wp_customize ) {
         'priority'    => 35,
     ));
 
-    // 大标题字体（英文衬线为主）
+    // 大标题字体（已合并为标题字体，保留字段兼容旧设置）
     $wp_customize->add_setting( 'li_cw_font_display', array(
-        'default'           => '"Cormorant Garamond", "Source Han Serif SC", "Noto Serif SC", Georgia, serif',
+        'default'           => '"Noto Serif SC", "Source Han Serif SC", "思源宋体 SC", Georgia, serif',
         'sanitize_callback' => 'sanitize_text_field',
     ));
     $wp_customize->add_control( 'li_cw_font_display', array(
         'section' => 'li_cw_section_fonts',
-        'label'   => esc_html__( '大标题字体栈', 'li-cw' ),
+        'label'   => esc_html__( '标题/展示字体栈', 'li-cw' ),
         'type'    => 'text',
-        'description' => '用于首页大标题、页面主标题',
+        'description' => '用于首页大标题、页面主标题、章节标题',
     ));
 
     // 标题字体（中文宋体）
     $wp_customize->add_setting( 'li_cw_font_heading', array(
-        'default'           => '"Source Han Serif SC", "Noto Serif SC", "思源宋体 SC", Georgia, serif',
+        'default'           => '"Noto Serif SC", "Source Han Serif SC", "思源宋体 SC", Georgia, serif',
         'sanitize_callback' => 'sanitize_text_field',
     ));
     $wp_customize->add_control( 'li_cw_font_heading', array(
@@ -402,33 +402,33 @@ function li_cw_register_customizer( $wp_customize ) {
         'description' => '用于章节标题、文章标题',
     ));
 
-    // 正文字体
+    // 正文字体 — Alegreya + 思源宋体（拉丁 + CJK 双衬线）
     $wp_customize->add_setting( 'li_cw_font_body', array(
-        'default'           => '"Source Han Serif SC", "Noto Serif SC", "思源宋体 SC", Georgia, serif',
+        'default'           => '"Alegreya", "Noto Serif SC", "Source Han Serif SC", "思源宋体 SC", Georgia, serif',
         'sanitize_callback' => 'sanitize_text_field',
     ));
     $wp_customize->add_control( 'li_cw_font_body', array(
         'section' => 'li_cw_section_fonts',
         'label'   => esc_html__( '正文字体栈', 'li-cw' ),
         'type'    => 'text',
-        'description' => '用于正文段落',
+        'description' => '用于正文段落。Alegreya 为拉丁文提供温暖的人文主义衬线质感',
     ));
 
-    // 界面字体
+    // 界面字体 — 全站衬线统一
     $wp_customize->add_setting( 'li_cw_font_ui', array(
-        'default'           => '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        'default'           => '"Alegreya", Georgia, "Noto Serif SC", serif',
         'sanitize_callback' => 'sanitize_text_field',
     ));
     $wp_customize->add_control( 'li_cw_font_ui', array(
         'section' => 'li_cw_section_fonts',
         'label'   => esc_html__( '界面字体栈', 'li-cw' ),
         'type'    => 'text',
-        'description' => '用于导航、按钮、标签、日期等UI元素',
+        'description' => '用于导航、按钮、标签、日期等UI元素。衬线UI是主题的核心差异化',
     ));
 
     // 点缀字体（霞鹜文楷）
     $wp_customize->add_setting( 'li_cw_font_accent', array(
-        'default'           => '"LXGW WenKai", "霞鹜文楷", "Source Han Serif SC", serif',
+        'default'           => '"LXGW WenKai", "霞鹜文楷", "Noto Serif SC", "Source Han Serif SC", serif',
         'sanitize_callback' => 'sanitize_text_field',
     ));
     $wp_customize->add_control( 'li_cw_font_accent', array(

@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 <header class="site-header">
     <div class="container header-inner">
         <!-- 站点Logo -->
-        <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="site-logo" style="font-family: var(--font-display);">
+        <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="site-logo" style="font-family: var(--font-heading);">
             <?php bloginfo( 'name' ); ?>
         </a>
 
@@ -27,6 +27,12 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
         <!-- 右侧操作区 -->
         <div class="header-actions">
+            <!-- 移动端汉堡菜单按钮 -->
+            <button class="nav-toggle" aria-label="<?php esc_attr_e( '菜单', 'li-cw' ); ?>" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
             <button class="search-toggle" aria-label="<?php esc_attr_e( '搜索', 'li-cw' ); ?>">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="11" cy="11" r="8"></circle>

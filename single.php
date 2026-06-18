@@ -15,14 +15,21 @@ get_header();
 
         <article class="single-post">
             <!-- 文章头部 -->
-            <header class="single-header">
+            <header class="single-header reveal">
                 <div class="single-meta">
                     <?php echo get_the_date(); ?>
                     <?php
                     $tag = li_cw_get_blog_tag( get_the_ID() );
                     if ( $tag ) echo ' · ' . esc_html( $tag );
+                    $categories = get_the_category();
+                    if ( $categories ) {
+                        foreach ( $categories as $cat ) {
+                            echo ' · <a href="' . esc_url( get_category_link( $cat->term_id ) ) . '" class="single-cat-link">' . esc_html( $cat->name ) . '</a>';
+                        }
+                    }
                     ?>
                 </div>
+
                 <h1 class="single-title"><?php the_title(); ?></h1>
             </header>
 

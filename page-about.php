@@ -14,12 +14,12 @@ $desc     = li_cw_get_option( 'li_cw_about_desc' );
 <main class="site-main">
     <div class="container">
         <!-- 顶部个人信息卡 -->
-        <div class="about-wrap">
+        <div class="about-wrap reveal">
             <?php if ( $avatar ) : ?>
                 <img src="<?php echo esc_url( $avatar ); ?>" alt="<?php echo esc_attr( $name ); ?>" class="about-avatar">
             <?php endif; ?>
 
-            <h1 class="about-name" style="font-family: var(--font-display); font-weight: 600;">
+            <h1 class="about-name" style="font-family: var(--font-heading); font-weight: 600;">
                 <?php echo esc_html( $name ); ?>
             </h1>
             <p class="about-title" style="font-family: var(--font-ui);">
