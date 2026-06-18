@@ -1,0 +1,13 @@
+# 系统垃圾文件
+.DS_Store
+Thumbs.db
+__MACOSX
+
+# 开发临时文件
+*.log
+.vscode/
+.idea/
+
+# 压缩包（源码仓库不放安装包）
+*.zip
+*.rar
