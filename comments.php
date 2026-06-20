@@ -57,27 +57,41 @@ if ( post_password_required() ) return;
         <div class="comment-modal-mask"></div>
         <div class="comment-modal-box">
             <div class="comment-modal-header">
-                <h4 style="font-family:var(--font-heading); font-weight:500; margin:0;"><?php esc_html_e( '发表评论', 'li-cw' ); ?></h4>
-                <button class="comment-modal-close" id="closeCommentForm">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
+                <h4 class="comment-modal-title"><?php esc_html_e( '发表评论', 'li-cw' ); ?></h4>
+                <div class="comment-modal-header-actions">
+                    <span class="comment-cancel-reply" style="display:none;">
+                        <a href="#" id="cancelReplyInModal"><?php esc_html_e( '取消回复', 'li-cw' ); ?></a>
+                    </span>
+                    <button class="comment-modal-close" id="closeCommentForm">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
             </div>
             <div class="comment-modal-body">
                 <?php
+                $commenter = wp_get_current_commenter();
+                $req       = get_option( 'require_name_email' );
+                $consent   = empty( $commenter['comment_author_email'] ) ? '' : ' checked="checked"';
+
                 comment_form( array(
-                    'title_reply'   => '',
-                    'fields'        => array(
-                        'author' => '<p class="comment-form-author"><label>昵称*</label><input type="text" name="author" autocomplete="name" required></p>',
-                        'email'  => '<p class="comment-form-email"><label>邮箱（不会公开）*</label><input type="email" name="email" autocomplete="email" required></p>',
-                        'url'    => '<p class="comment-form-url"><label>个人网站</label><input type="url" name="url" autocomplete="url"></p>',
+                    'title_reply'          => '',
+                    'comment_notes_before' => '',
+                    'comment_notes_after'  => '',
+                    'logged_in_as'         => '',
+                    'fields'               => array(
+                        'author'  => '<p class="comment-form-author"><label>' . esc_html__( '昵称', 'li-cw' ) . ( $req ? ' *' : '' ) . '</label><input type="text" name="author" value="' . esc_attr( $commenter['comment_author'] ) . '" autocomplete="name" required></p>',
+                        'email'   => '<p class="comment-form-email"><label>' . esc_html__( '邮箱（不会公开）', 'li-cw' ) . ( $req ? ' *' : '' ) . '</label><input type="email" name="email" value="' . esc_attr( $commenter['comment_author_email'] ) . '" autocomplete="email" required></p>',
+                        'url'     => '<p class="comment-form-url"><label>' . esc_html__( '个人网站', 'li-cw' ) . '</label><input type="url" name="url" value="' . esc_attr( $commenter['comment_author_url'] ) . '" autocomplete="url"></p>',
+                        'cookies' => '<p class="comment-form-cookies"><label><input type="checkbox" name="wp-comment-cookies-consent" value="yes"' . $consent . '> ' . esc_html__( '本地保存我的信息，以便下次评论时使用。', 'li-cw' ) . '</label></p>',
                     ),
-                    'comment_field' => '<p class="comment-form-comment"><label>评论内容*</label><textarea name="comment" id="comment" rows="4" autocomplete="off" required></textarea></p>',
-                    'label_submit'  => '提交评论',
+                    'comment_field' => '<p class="comment-form-comment"><label>' . esc_html__( '评论内容', 'li-cw' ) . ' *</label><textarea name="comment" id="comment" rows="4" autocomplete="off" required></textarea></p>',
+                    'label_submit'  => esc_html__( '', 'li-cw' ),
                     'submit_button' => '<button type="submit" class="btn-primary">%4$s</button>',
-                    'must_log_in'   => '<p class="must-log-in" style="font-size:0.9rem; color:var(--text-secondary);">请先登录后发表评论</p>',
+                    'must_log_in'   => '<p class="must-log-in" style="font-size:0.9rem; color:var(--text-secondary);">' . esc_html__( '请先登录后发表评论', 'li-cw' ) . '</p>',
+
                 ));
                 ?>
             </div>
@@ -91,6 +105,14 @@ if ( post_password_required() ) return;
  * 自定义精简评论项输出
  */
 function li_cw_simple_comment( $comment, $args, $depth ) {
+    $is_reply = ( $depth > 1 );
+    $parent_author = '';
+    if ( $is_reply ) {
+        $parent_comment = get_comment( $comment->comment_parent );
+        if ( $parent_comment ) {
+            $parent_author = $parent_comment->comment_author;
+        }
+    }
     ?>
     <li <?php comment_class(); ?> id="comment-<?php comment_ID(); ?>">
         <div class="comment-body">
@@ -100,6 +122,11 @@ function li_cw_simple_comment( $comment, $args, $depth ) {
             </div>
             <div class="comment-meta">
                 <?php echo get_comment_date(); ?>
+                <?php if ( $is_reply && $parent_author ) : ?>
+                    <span class="comment-reply-to">
+                        <?php printf( esc_html__( '回复 %s', 'li-cw' ), '<span class="reply-to-name">' . esc_html( $parent_author ) . '</span>' ); ?>
+                    </span>
+                <?php endif; ?>
             </div>
             <div class="comment-content">
                 <?php comment_text(); ?>

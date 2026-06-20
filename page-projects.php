@@ -7,12 +7,12 @@ get_header();
 ?>
 
 <main class="site-main">
-    <div class="container" style="padding-top: 40px;">
-        <header class="page-header" style="margin-bottom: 32px;">
+    <div class="container">
+        <header class="page-header">
             <h1 class="section-title">
                 <span><?php esc_html_e( '作品', 'li-cw' ); ?></span>
             </h1>
-            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: -16px; margin-bottom: 24px;">
+            <p class="page-subtitle">
                 <?php esc_html_e( '一些正在进行或完成的项目。', 'li-cw' ); ?>
             </p>
         </header>

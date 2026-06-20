@@ -212,8 +212,7 @@ function li_cw_register_customizer( $wp_customize ) {
         'type'    => 'textarea',
     ));
 
-   // 社交链接 - 5个可配置项，每个含名称（tooltip用）+ 链接
-        // 社交链接 - 5个可配置项，下拉选图标类型，无需手写SVG
+   // 社交链接
     $social_items = array(
         '1' => '社交链接 1',
         '2' => '社交链接 2',
@@ -244,14 +243,14 @@ function li_cw_register_customizer( $wp_customize ) {
             ),
         ));
 
-        // 名称（悬浮提示）
+        // 名称
         $wp_customize->add_setting( "li_cw_social_{$num}_name", array(
             'default'           => '',
             'sanitize_callback' => 'sanitize_text_field',
         ));
         $wp_customize->add_control( "li_cw_social_{$num}_name", array(
             'section' => 'li_cw_section_about',
-            'label'   => $label . ' - 名称（悬浮提示）',
+            'label'   => $label . ' - 名称',
             'type'    => 'text',
         ));
 
@@ -266,7 +265,7 @@ function li_cw_register_customizer( $wp_customize ) {
             'type'    => 'url',
         ));
 
-        // ====== 新增：自定义SVG代码（可选，填了覆盖预设）======
+        // ====== 自定义SVG代码（可选，填了覆盖预设）======
         $wp_customize->add_setting( "li_cw_social_{$num}_custom_icon", array(
             'default'           => '',
             'sanitize_callback' => 'wp_kses_post',
@@ -324,6 +323,47 @@ function li_cw_register_customizer( $wp_customize ) {
         'label'   => esc_html__( '使用条款链接', 'li-cw' ),
         'type'    => 'url',
     ));
+
+    // 主题版权署名开关
+    $wp_customize->add_setting( 'li_cw_footer_credit', array(
+        'default'           => true,
+        'sanitize_callback' => 'wp_validate_boolean',
+    ));
+    $wp_customize->add_control( 'li_cw_footer_credit', array(
+        'section' => 'li_cw_section_footer',
+        'label'   => esc_html__( '显示「由 Li CW 主题 驱动」署名', 'li-cw' ),
+        'type'    => 'checkbox',
+    ));
+
+    // 页脚自定义 HTML
+    $wp_customize->add_setting( 'li_cw_footer_custom_html', array(
+        'default'           => '',
+        'sanitize_callback' => 'wp_kses_post',
+    ));
+    $wp_customize->add_control( 'li_cw_footer_custom_html', array(
+        'section'     => 'li_cw_section_footer',
+        'label'       => esc_html__( '页脚自定义 HTML', 'li-cw' ),
+        'type'        => 'textarea',
+        'description' => '支持 HTML 标签，可添加统计代码、徽章、额外链接等。留空则不显示。',
+    ));
+
+    // ========== 5.5. 说说设置 ==========
+    $wp_customize->add_section( 'li_cw_section_shuoshuo', array(
+        'title'       => esc_html__( '说说设置', 'li-cw' ),
+        'priority'    => 52,
+    ));
+
+    $wp_customize->add_setting( 'li_cw_shuoshuo_count', array(
+        'default'           => 15,
+        'sanitize_callback' => 'absint',
+    ));
+    $wp_customize->add_control( 'li_cw_shuoshuo_count', array(
+        'section'     => 'li_cw_section_shuoshuo',
+        'label'       => esc_html__( '每页显示数量', 'li-cw' ),
+        'type'        => 'number',
+        'input_attrs' => array( 'min' => 5, 'max' => 50 ),
+    ));
+
     // ========== 6. 友链页面设置 ==========
     $wp_customize->add_section( 'li_cw_section_links', array(
         'title'       => esc_html__( '友链设置', 'li-cw' ),

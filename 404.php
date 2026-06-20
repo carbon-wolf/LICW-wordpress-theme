@@ -10,7 +10,7 @@ get_header();
     <div class="container">
         <div style="text-align: center; padding: 120px 0;">
             <p style="color: var(--accent-gold); letter-spacing: 0.2em; margin-bottom: 16px;">404 ERROR</p>
-            <h1 style="font-family: var(--font-serif); font-size: 2.5rem; margin-bottom: 16px;">
+            <h1 style="font-family: var(--font-heading); font-size: 2.5rem; margin-bottom: 16px;">
                 <?php esc_html_e( '页面走丢了', 'li-cw' ); ?>
             </h1>
             <p style="color: var(--text-secondary); max-width: 400px; margin: 0 auto 32px;">

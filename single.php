@@ -38,8 +38,12 @@ get_header();
                 <?php the_post_thumbnail( 'single-hero', array( 'class' => 'single-hero-img', 'alt' => the_title_attribute( 'echo=0' ) ) ); ?>
             <?php endif; ?>
 
-            <!-- 正文内容 -->
-            <div class="single-content">
+            <div class="single-body">
+                <!-- 文章目录 -->
+                <?php echo li_cw_get_toc(); ?>
+
+                <!-- 正文内容 -->
+                <div class="single-content">
                 <?php the_content(); ?>
 
                 <?php
@@ -49,6 +53,7 @@ get_header();
                 ));
                 ?>
             </div>
+            </div><!-- .single-body -->
         </article>
                 <!-- 上一篇 / 下一篇导航 -->
         <div class="post-navigation">
