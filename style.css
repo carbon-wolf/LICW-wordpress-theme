@@ -3,7 +3,7 @@ Theme Name: Li CW 创作主题
 Theme URI: https://github.com/carbon-wolf/LICW-wordpress-theme
 Author: 林泽凯
 Description: 极简优雅的个人创作博客主题，适配写作、作品展示
-Version: 1.1.2
+Version: 1.1.3
 License: GNU General Public License v2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: 极简, 博客, 作品集, 暗色模式, 响应式
@@ -1188,6 +1188,150 @@ button {
     opacity: 1;
 }
 /* ============================================
+   正文列表 — 有序 & 无序
+   金色长破折号标记呼应 blockquote 菱形标，手工装帧感
+   ============================================ */
+
+/* === 列表容器 === */
+.single-content ul,
+.single-content ol {
+  margin: 1.2em 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.single-content li {
+  margin-bottom: 0.4em;
+  line-height: var(--leading-relaxed);
+}
+
+/* === 无序列表 — 金色 em-dash 标记 === */
+.single-content ul > li {
+  position: relative;
+  padding-left: 1.5em;
+}
+
+.single-content ul > li::before {
+  content: "\2014"; /* em dash */
+  position: absolute;
+  left: 0;
+  color: var(--accent-gold);
+  font-weight: 400;
+}
+
+/* === 有序列表 — 金色序号 === */
+.single-content ol {
+  counter-reset: article-ol;
+}
+
+.single-content ol > li {
+  position: relative;
+  padding-left: 2em;
+  counter-increment: article-ol;
+}
+
+.single-content ol > li::before {
+  content: counter(article-ol) ".";
+  position: absolute;
+  left: 0;
+  color: var(--accent-gold);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-ui);
+}
+
+/* === 嵌套列表 === */
+.single-content li > ul,
+.single-content li > ol {
+  margin: 0.35em 0 0.15em;
+}
+
+/* 二级有序列表 → 小写字母序号 */
+.single-content ol ol {
+  counter-reset: article-ol-sub;
+}
+
+.single-content ol ol > li {
+  counter-increment: article-ol-sub;
+}
+
+.single-content ol ol > li::before {
+  content: counter(article-ol-sub, lower-alpha) ".";
+}
+
+/* 二级无序列表 → 短破折号 (en dash)，区分层级 */
+.single-content ul ul > li::before,
+.single-content ol ul > li::before {
+  content: "\2013"; /* en dash */
+  color: var(--text-secondary);
+}
+
+/* 列表内嵌段落间距微调 */
+.single-content li > p {
+  margin-bottom: 0.4em;
+}
+
+/* ============================================
+   正文表格 — 账本式横线分隔，克制清晰
+   移动端自动横向滚动
+   ============================================ */
+.single-content table,
+.about-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+  font-size: var(--text-meta);
+  line-height: var(--leading-relaxed);
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.single-content thead,
+.about-content thead {
+  border-bottom: 2px solid var(--accent-gold);
+}
+
+.single-content th,
+.about-content th {
+  padding: 0.6em 0.8em;
+  text-align: left;
+  font-weight: 600;
+  font-family: var(--font-heading);
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.single-content td,
+.about-content td {
+  padding: 0.5em 0.8em;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: top;
+}
+
+.single-content tr:last-child td,
+.about-content tr:last-child td {
+  border-bottom: none;
+}
+
+/* 偶数行微着色 — 极淡，不抢夺阅读注意力 */
+.single-content tbody tr:nth-child(even),
+.about-content tbody tr:nth-child(even) {
+  background: var(--bg-card);
+}
+
+/* 表格标题 / figcaption */
+.single-content figcaption,
+.single-content table caption,
+.about-content figcaption,
+.about-content table caption {
+  margin-bottom: 0.5em;
+  font-size: var(--text-meta);
+  color: var(--text-secondary);
+  text-align: left;
+}
+
+/* ============================================
    代码块美化（行内 + 块级）
    ============================================ */
 /* 行内代码：正文段落中穿插的短代码 */
@@ -1404,13 +1548,77 @@ pre::-webkit-scrollbar-thumb:hover {
   line-height: 1;
 }
 
+/* 关于页列表 — 与正文列表保持一致的标记风格 */
 .about-content ul,
 .about-content ol {
-  margin: 1em 0 1em 2em;
+  margin: 1.2em 0;
+  padding-left: 0;
+  list-style: none;
 }
 
 .about-content li {
-  margin-bottom: 0.5em;
+  margin-bottom: 0.4em;
+  line-height: var(--leading-relaxed);
+}
+
+.about-content ul > li {
+  position: relative;
+  padding-left: 1.5em;
+}
+
+.about-content ul > li::before {
+  content: "\2014"; /* em dash */
+  position: absolute;
+  left: 0;
+  color: var(--accent-gold);
+  font-weight: 400;
+}
+
+.about-content ol {
+  counter-reset: about-ol;
+}
+
+.about-content ol > li {
+  position: relative;
+  padding-left: 2em;
+  counter-increment: about-ol;
+}
+
+.about-content ol > li::before {
+  content: counter(about-ol) ".";
+  position: absolute;
+  left: 0;
+  color: var(--accent-gold);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-ui);
+}
+
+.about-content li > ul,
+.about-content li > ol {
+  margin: 0.35em 0 0.15em;
+}
+
+.about-content ol ol {
+  counter-reset: about-ol-sub;
+}
+
+.about-content ol ol > li {
+  counter-increment: about-ol-sub;
+}
+
+.about-content ol ol > li::before {
+  content: counter(about-ol-sub, lower-alpha) ".";
+}
+
+.about-content ul ul > li::before,
+.about-content ol ul > li::before {
+  content: "\2013"; /* en dash */
+  color: var(--text-secondary);
+}
+
+.about-content li > p {
+  margin-bottom: 0.4em;
 }
 
 .about-content hr {
