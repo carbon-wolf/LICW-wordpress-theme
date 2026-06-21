@@ -364,54 +364,54 @@ function li_cw_register_customizer( $wp_customize ) {
         'input_attrs' => array( 'min' => 5, 'max' => 50 ),
     ));
 
-    // ========== 6. 友链页面设置 ==========
-    $wp_customize->add_section( 'li_cw_section_links', array(
-        'title'       => esc_html__( '友链设置', 'li-cw' ),
-        'priority'    => 55,
-    ));
+    // // ========== 6. 友链页面设置 ==========
+    // $wp_customize->add_section( 'li_cw_section_links', array(
+    //     'title'       => esc_html__( '友链设置', 'li-cw' ),
+    //     'priority'    => 55,
+    // ));
 
-    // 友链数量
-    $link_count = 8;
-    for ( $i = 1; $i <= $link_count; $i++ ) {
-        // 站点名称
-        $wp_customize->add_setting( "li_cw_link_{$i}_name", array(
-            'sanitize_callback' => 'sanitize_text_field',
-        ));
-        $wp_customize->add_control( "li_cw_link_{$i}_name", array(
-            'section' => 'li_cw_section_links',
-            'label'   => "友链 {$i} - 站点名称",
-            'type'    => 'text',
-        ));
+    // // 友链数量
+    // $link_count = 8;
+    // for ( $i = 1; $i <= $link_count; $i++ ) {
+    //     // 站点名称
+    //     $wp_customize->add_setting( "li_cw_link_{$i}_name", array(
+    //         'sanitize_callback' => 'sanitize_text_field',
+    //     ));
+    //     $wp_customize->add_control( "li_cw_link_{$i}_name", array(
+    //         'section' => 'li_cw_section_links',
+    //         'label'   => "友链 {$i} - 站点名称",
+    //         'type'    => 'text',
+    //     ));
 
-        // 站点链接
-        $wp_customize->add_setting( "li_cw_link_{$i}_url", array(
-            'sanitize_callback' => 'esc_url_raw',
-        ));
-        $wp_customize->add_control( "li_cw_link_{$i}_url", array(
-            'section' => 'li_cw_section_links',
-            'label'   => "友链 {$i} - 站点地址",
-            'type'    => 'url',
-        ));
+    //     // 站点链接
+    //     $wp_customize->add_setting( "li_cw_link_{$i}_url", array(
+    //         'sanitize_callback' => 'esc_url_raw',
+    //     ));
+    //     $wp_customize->add_control( "li_cw_link_{$i}_url", array(
+    //         'section' => 'li_cw_section_links',
+    //         'label'   => "友链 {$i} - 站点地址",
+    //         'type'    => 'url',
+    //     ));
 
-        // 站点描述
-        $wp_customize->add_setting( "li_cw_link_{$i}_desc", array(
-            'sanitize_callback' => 'sanitize_text_field',
-        ));
-        $wp_customize->add_control( "li_cw_link_{$i}_desc", array(
-            'section' => 'li_cw_section_links',
-            'label'   => "友链 {$i} - 站点描述",
-            'type'    => 'text',
-        ));
+    //     // 站点描述
+    //     $wp_customize->add_setting( "li_cw_link_{$i}_desc", array(
+    //         'sanitize_callback' => 'sanitize_text_field',
+    //     ));
+    //     $wp_customize->add_control( "li_cw_link_{$i}_desc", array(
+    //         'section' => 'li_cw_section_links',
+    //         'label'   => "友链 {$i} - 站点描述",
+    //         'type'    => 'text',
+    //     ));
 
-        // 站点头像/Logo
-        $wp_customize->add_setting( "li_cw_link_{$i}_avatar", array(
-            'sanitize_callback' => 'esc_url_raw',
-        ));
-        $wp_customize->add_control( new WP_Customize_Image_Control( $wp_customize, "li_cw_link_{$i}_avatar", array(
-            'section' => 'li_cw_section_links',
-            'label'   => "友链 {$i} - 站点头像/Logo",
-        )));
-    }
+    //     // 站点头像/Logo
+    //     $wp_customize->add_setting( "li_cw_link_{$i}_avatar", array(
+    //         'sanitize_callback' => 'esc_url_raw',
+    //     ));
+    //     $wp_customize->add_control( new WP_Customize_Image_Control( $wp_customize, "li_cw_link_{$i}_avatar", array(
+    //         'section' => 'li_cw_section_links',
+    //         'label'   => "友链 {$i} - 站点头像/Logo",
+    //     )));
+    // }
     // ========== 5. 字体设置 ==========
     $wp_customize->add_section( 'li_cw_section_fonts', array(
         'title'       => esc_html__( '字体设置', 'li-cw' ),

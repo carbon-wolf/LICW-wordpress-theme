@@ -24,14 +24,18 @@ Tags: 极简, 博客, 作品集, 暗色模式, 响应式
   /* === 文字 === */
   /* 主文字 — 近黑，向品牌绿微调 0.005，纯黑在自然界不存在 */
   --text-primary: oklch(15% 0.005 170);
-  /* 辅助文字 — 中灰，向绿微调，替代无生气的纯灰 oklch(48% 0 0) */
-  --text-secondary: oklch(48% 0.005 170);
+  /* 辅助文字 — 中灰，向绿微调。oklch(42%) 在暖纸背景上达到 ~5:1 对比度，满足 WCAG AA */
+  --text-secondary: oklch(42% 0.005 170);
 
   /* === 强调色 — 60-30-10 中的 10% === */
   /* 深森林绿 */
   --accent: oklch(30% 0.055 170);
   /* 哑金 — 暖度与个性的主要载体 */
   --accent-gold: oklch(68% 0.09 82);
+  /* 哑金加深 — 用于 hover 文字，在暖纸背景上满足 WCAG AA 对比度 */
+  --accent-gold-hover: oklch(48% 0.09 82);
+  /* 置于强调色上的文字 — 近白，替代裸 #fff */
+  --text-on-accent: oklch(95% 0.02 160);
 
   /* === 语义状态色 === */
   /* 成功 — 暖鼠尾草绿，与 accent 绿同族 */
@@ -110,6 +114,10 @@ html.dark {
   /* 暗色强调 — 提亮以适应深背景，色度略降 */
   --accent: oklch(48% 0.06 170);
   --accent-gold: oklch(75% 0.08 82);
+  /* 暗色模式金 hover — 提亮以在深色背景上保持可见 */
+  --accent-gold-hover: oklch(82% 0.07 82);
+  /* 置于强调色上的文字 — 近白 */
+  --text-on-accent: oklch(98% 0 0 0);
 
   /* 暗色语义状态 */
   --color-success: oklch(65% 0.08 160);
@@ -296,7 +304,7 @@ button {
 }
 
 .section-title .more-link:hover {
-  color: var(--accent-gold);
+  color: var(--accent-gold-hover);
   opacity: 1;
 }
 
@@ -304,7 +312,7 @@ button {
   display: inline-block;
   padding: 10px 24px;
   background: var(--accent);
-  color: #fff;
+  color: var(--text-on-accent);
   border-radius: var(--radius);
   font-size: var(--text-meta);
   font-family: var(--font-ui);
@@ -352,14 +360,14 @@ button {
 }
 
 .btn-text:hover {
-  color: var(--accent-gold);
+  color: var(--accent-gold-hover);
   opacity: 1;
 }
 
 .btn-text::after {
   content: "→";
   transition: transform 0.2s, color 0.2s;
-  color: var(--accent-gold);
+  color: var(--accent-gold-hover);
 }
 
 .btn-text:hover::after {
@@ -409,8 +417,12 @@ button {
 
 .main-nav a:hover,
 .main-nav .current-menu-item > a {
-  color: var(--accent-gold);
+  color: var(--accent-gold-hover);
   opacity: 1;
+  text-decoration: underline;
+  text-decoration-color: var(--accent-gold);
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1.5px;
 }
 
 .main-nav .current-menu-item > a::after {
@@ -431,8 +443,8 @@ button {
 }
 
 .header-actions button {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -451,9 +463,8 @@ button {
   height: 18px;
 }
 
+/* 暗色切换图标保持视觉 20px，点击区域继承父级 44×44px */
 .dark-toggle {
-  width: 20px;
-  height: 20px;
   opacity: 0.8;
   transition: opacity 0.2s;
 }
@@ -470,8 +481,8 @@ button {
 }
 
 .nav-toggle {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -697,7 +708,7 @@ button {
 }
 
 .blog-card-content h3 a:hover {
-  color: var(--accent-gold);
+  color: var(--accent-gold-hover);
   opacity: 1;
 }
 
@@ -799,7 +810,7 @@ button {
 }
 
 .project-card:hover .project-title {
-  color: var(--accent-gold);
+  color: var(--accent-gold-hover);
 }
 
 .project-cat {
@@ -887,7 +898,7 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
+  padding: 8px 14px;
   border: 1px solid var(--border-color);
   border-radius: 20px;
   background: transparent;
@@ -900,12 +911,12 @@ button {
 
 .like-btn:hover {
   border-color: var(--accent-gold);
-  color: var(--accent-gold);
+  color: var(--accent-gold-hover);
 }
 
 .like-btn.is-liked {
   border-color: var(--accent-gold);
-  color: var(--accent-gold);
+  color: var(--accent-gold-hover);
 }
 
 .like-btn.is-liked .like-icon {
@@ -989,12 +1000,10 @@ button {
 }
 
 .toc-list {
-  list-style: none;
   counter-reset: toc-counter;
 }
 
 .toc-list ol {
-  list-style: none;
   padding-left: var(--space-lg);
 }
 
@@ -1127,12 +1136,13 @@ button {
 }
 
 /* Blockquote — 双重线框源自古典书籍排版，金色菱角点缀四角，手工装帧感 */
-.single-content blockquote {
+.single-content blockquote,
+.about-content blockquote {
   border: 1px solid var(--border-quote);
   outline: 1px solid var(--border-quote);
   outline-offset: 4px;
   padding: 1.8em 2em;
-  margin: 2.2em 0.5em;
+  margin: 2em 0.5em;
   color: var(--text-primary);
   background: var(--bg-quote);
   border-radius: 0;
@@ -1145,7 +1155,8 @@ button {
 }
 
 /* 左上角金色菱形标 — 仿佛装订线上的装饰铆钉 */
-.single-content blockquote::before {
+.single-content blockquote::before,
+.about-content blockquote::before {
   content: "◆";
   position: absolute;
   top: -0.55em;
@@ -1158,7 +1169,8 @@ button {
 }
 
 /* 右下角金色菱形标 */
-.single-content blockquote::after {
+.single-content blockquote::after,
+.about-content blockquote::after {
   content: "◆";
   position: absolute;
   bottom: -0.55em;
@@ -1188,30 +1200,35 @@ button {
     opacity: 1;
 }
 /* ============================================
-   正文列表 — 有序 & 无序
+   正文列表 — 有序 & 无序（含关于页）
    金色长破折号标记呼应 blockquote 菱形标，手工装帧感
    ============================================ */
 
 /* === 列表容器 === */
 .single-content ul,
-.single-content ol {
+.single-content ol,
+.about-content ul,
+.about-content ol {
   margin: 1.2em 0;
   padding-left: 0;
   list-style: none;
 }
 
-.single-content li {
+.single-content li,
+.about-content li {
   margin-bottom: 0.4em;
   line-height: var(--leading-relaxed);
 }
 
 /* === 无序列表 — 金色 em-dash 标记 === */
-.single-content ul > li {
+.single-content ul > li,
+.about-content ul > li {
   position: relative;
   padding-left: 1.5em;
 }
 
-.single-content ul > li::before {
+.single-content ul > li::before,
+.about-content ul > li::before {
   content: "\2014"; /* em dash */
   position: absolute;
   left: 0;
@@ -1220,18 +1237,21 @@ button {
 }
 
 /* === 有序列表 — 金色序号 === */
-.single-content ol {
-  counter-reset: article-ol;
+.single-content ol,
+.about-content ol {
+  counter-reset: content-ol;
 }
 
-.single-content ol > li {
+.single-content ol > li,
+.about-content ol > li {
   position: relative;
   padding-left: 2em;
-  counter-increment: article-ol;
+  counter-increment: content-ol;
 }
 
-.single-content ol > li::before {
-  content: counter(article-ol) ".";
+.single-content ol > li::before,
+.about-content ol > li::before {
+  content: counter(content-ol) ".";
   position: absolute;
   left: 0;
   color: var(--accent-gold);
@@ -1242,32 +1262,40 @@ button {
 
 /* === 嵌套列表 === */
 .single-content li > ul,
-.single-content li > ol {
+.single-content li > ol,
+.about-content li > ul,
+.about-content li > ol {
   margin: 0.35em 0 0.15em;
 }
 
 /* 二级有序列表 → 小写字母序号 */
-.single-content ol ol {
-  counter-reset: article-ol-sub;
+.single-content ol ol,
+.about-content ol ol {
+  counter-reset: content-ol-sub;
 }
 
-.single-content ol ol > li {
-  counter-increment: article-ol-sub;
+.single-content ol ol > li,
+.about-content ol ol > li {
+  counter-increment: content-ol-sub;
 }
 
-.single-content ol ol > li::before {
-  content: counter(article-ol-sub, lower-alpha) ".";
+.single-content ol ol > li::before,
+.about-content ol ol > li::before {
+  content: counter(content-ol-sub, lower-alpha) ".";
 }
 
 /* 二级无序列表 → 短破折号 (en dash)，区分层级 */
 .single-content ul ul > li::before,
-.single-content ol ul > li::before {
+.single-content ol ul > li::before,
+.about-content ul ul > li::before,
+.about-content ol ul > li::before {
   content: "\2013"; /* en dash */
   color: var(--text-secondary);
 }
 
 /* 列表内嵌段落间距微调 */
-.single-content li > p {
+.single-content li > p,
+.about-content li > p {
   margin-bottom: 0.4em;
 }
 
@@ -1506,121 +1534,6 @@ pre::-webkit-scrollbar-thumb:hover {
   margin: 1.5em 0;
 }
 
-/* About blockquote — 与正文 blockquote 统一 */
-.about-content blockquote {
-  border: 1px solid var(--border-quote);
-  outline: 1px solid var(--border-quote);
-  outline-offset: 4px;
-  padding: 1.8em 2em;
-  margin: 2em 0.5em;
-  color: var(--text-primary);
-  background: var(--bg-quote);
-  border-radius: 0;
-  font-family: var(--font-accent);
-  font-size: 1.05em;
-  font-weight: 400;
-  line-height: var(--leading-relaxed);
-  letter-spacing: 0.02em;
-  position: relative;
-}
-
-.about-content blockquote::before {
-  content: "◆";
-  position: absolute;
-  top: -0.55em;
-  left: 1.4em;
-  font-size: 0.45rem;
-  color: var(--accent-gold);
-  background: var(--bg-quote);
-  padding: 0 4px;
-  line-height: 1;
-}
-
-.about-content blockquote::after {
-  content: "◆";
-  position: absolute;
-  bottom: -0.55em;
-  right: 1.4em;
-  font-size: 0.45rem;
-  color: var(--accent-gold);
-  background: var(--bg-quote);
-  padding: 0 4px;
-  line-height: 1;
-}
-
-/* 关于页列表 — 与正文列表保持一致的标记风格 */
-.about-content ul,
-.about-content ol {
-  margin: 1.2em 0;
-  padding-left: 0;
-  list-style: none;
-}
-
-.about-content li {
-  margin-bottom: 0.4em;
-  line-height: var(--leading-relaxed);
-}
-
-.about-content ul > li {
-  position: relative;
-  padding-left: 1.5em;
-}
-
-.about-content ul > li::before {
-  content: "\2014"; /* em dash */
-  position: absolute;
-  left: 0;
-  color: var(--accent-gold);
-  font-weight: 400;
-}
-
-.about-content ol {
-  counter-reset: about-ol;
-}
-
-.about-content ol > li {
-  position: relative;
-  padding-left: 2em;
-  counter-increment: about-ol;
-}
-
-.about-content ol > li::before {
-  content: counter(about-ol) ".";
-  position: absolute;
-  left: 0;
-  color: var(--accent-gold);
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-  font-family: var(--font-ui);
-}
-
-.about-content li > ul,
-.about-content li > ol {
-  margin: 0.35em 0 0.15em;
-}
-
-.about-content ol ol {
-  counter-reset: about-ol-sub;
-}
-
-.about-content ol ol > li {
-  counter-increment: about-ol-sub;
-}
-
-.about-content ol ol > li::before {
-  content: counter(about-ol-sub, lower-alpha) ".";
-}
-
-.about-content ul ul > li::before,
-.about-content ol ul > li::before {
-  content: "\2013"; /* en dash */
-  color: var(--text-secondary);
-}
-
-.about-content li > p {
-  margin-bottom: 0.4em;
-}
-
 .about-content hr {
   border: none;
   border-top: 1px solid var(--border-color);
@@ -1741,7 +1654,7 @@ pre::-webkit-scrollbar-thumb:hover {
 .page-numbers.current {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--text-on-accent);
 }
 
 /* ============================================
@@ -1796,8 +1709,8 @@ pre::-webkit-scrollbar-thumb:hover {
 }
 
 .search-close {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2107,8 +2020,8 @@ pre::-webkit-scrollbar-thumb:hover {
 }
 
 .comment-modal-close {
-  width: 28px;
-  height: 28px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2230,7 +2143,7 @@ pre::-webkit-scrollbar-thumb:hover {
 
 .footer-nav a:hover,
 .footer-nav .current-menu-item > a {
-  color: var(--accent-gold);
+  color: var(--accent-gold-hover);
   opacity: 1;
 }
 
@@ -2239,7 +2152,7 @@ pre::-webkit-scrollbar-thumb:hover {
 }
 
 .footer-beian a:hover {
-  color: var(--accent-gold);
+  color: var(--accent-gold-hover);
   opacity: 1;
 }
 
@@ -2271,7 +2184,7 @@ pre::-webkit-scrollbar-thumb:hover {
 }
 
 .back-to-top:hover {
-  color: var(--accent-gold);
+  color: var(--accent-gold-hover);
   opacity: 1;
 }
 
@@ -2398,6 +2311,35 @@ pre::-webkit-scrollbar-thumb:hover {
 
   .projects-grid {
     grid-template-columns: 1fr;
+  }
+
+  .photos-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-sm);
+  }
+
+  .photo-info {
+    padding: 10px 12px 14px;
+  }
+
+  .photo-title {
+    font-size: var(--text-meta);
+  }
+
+  .single-photo-img {
+    border-radius: 0;
+    margin-left: calc(-1 * var(--space-md));
+    margin-right: calc(-1 * var(--space-md));
+    width: calc(100% + 2 * var(--space-md));
+  }
+
+  .photo-tags {
+    gap: 6px;
+  }
+
+  .photo-tag {
+    font-size: 12px;
+    padding: 2px 8px;
   }
 
   .single-header {
@@ -2757,7 +2699,186 @@ html.dark .hljs-comment { color: #5c6370; }
 html.dark .hljs-function { color: #61afef; }
 
 /* ============================================
-   19. 图片灯箱
+   18. 照片墙 / Photo Gallery
+   ============================================ */
+
+/* 照片网格 — 自适应列数，最小 280px 列宽 */
+.photos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-lg);
+}
+
+/* 空状态 */
+.photos-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: var(--text-meta);
+  padding: var(--space-2xl) 0;
+}
+
+/* 照片卡片 */
+.photo-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.25s var(--ease-out);
+}
+
+.photo-card:hover {
+  transform: translateY(-4px);
+}
+
+/* 缩略图 — 正方形比例 */
+.photo-thumb {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: var(--border-color);
+}
+
+.photo-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s var(--ease-out);
+}
+
+.photo-card:hover .photo-thumb img {
+  transform: scale(1.06);
+}
+
+/* 无特色图占位 */
+.photo-thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  background: var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: var(--text-caption);
+}
+
+.photo-thumb-placeholder::after {
+  content: "\6682\65E0\56FE\7247";
+}
+
+/* 卡片信息区 */
+.photo-info {
+  padding: 14px 18px 18px;
+}
+
+.photo-title {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: var(--text-subhead);
+  margin-bottom: 6px;
+  transition: color 0.2s;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.photo-card:hover .photo-title {
+  color: var(--accent-gold-hover);
+}
+
+.photo-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+}
+
+.photo-date,
+.photo-location,
+.photo-camera {
+  font-family: var(--font-ui);
+  font-size: var(--text-caption);
+  color: var(--text-secondary);
+}
+
+.photo-date::before {
+  content: "\1F4C5 ";
+}
+
+.photo-location::before {
+  content: "\1F4CD ";
+}
+
+.photo-camera::before {
+  content: "\1F4F7 ";
+}
+
+/* --- 卡片 hover 正文摘要 --- */
+.photo-excerpt {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--space-md);
+  background: oklch(0% 0 0 / 0.68);
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-out);
+  pointer-events: none;
+  overflow-y: auto;
+}
+
+.photo-card:hover .photo-excerpt {
+  opacity: 1;
+}
+
+.photo-excerpt p {
+  width: 100%;
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: var(--text-meta);
+  line-height: var(--leading-relaxed);
+  text-align: left;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+/* ============================================
+   19. 单张照片页
+   ============================================ */
+
+/* 全尺寸照片 — 保持原比例 */
+.single-photo-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  margin-bottom: var(--space-md);
+  cursor: zoom-in;
+}
+
+/* 拍摄信息标签 */
+.photo-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-top: var(--space-sm);
+}
+
+.photo-tag {
+  display: inline-block;
+  font-family: var(--font-ui);
+  font-size: var(--text-caption);
+  padding: 3px 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  color: var(--text-secondary);
+  letter-spacing: 0.03em;
+}
+
+/* ============================================
+   20. 图片灯箱
    ============================================ */
 .lightbox-overlay {
   position: fixed;
@@ -2803,7 +2924,7 @@ html.dark .hljs-function { color: #61afef; }
   width: 32px;
   height: 32px;
   border: 2.5px solid oklch(100% 0 0 / 0.2);
-  border-top-color: #fff;
+  border-top-color: var(--text-on-accent);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   opacity: 0;
@@ -2825,15 +2946,15 @@ html.dark .hljs-function { color: #61afef; }
   position: absolute;
   top: 24px;
   right: 24px;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: oklch(100% 0 0 / 0.12);
   border: 1px solid oklch(100% 0 0 / 0.18);
   border-radius: 50%;
-  color: #fff;
+  color: var(--text-on-accent);
   font-size: 22px;
   line-height: 1;
   cursor: pointer;
@@ -2860,7 +2981,7 @@ html.dark .hljs-function { color: #61afef; }
   background: oklch(100% 0 0 / 0.08);
   border: none;
   border-radius: var(--radius);
-  color: #fff;
+  color: var(--text-on-accent);
   font-size: 36px;
   font-family: var(--font-ui);
   line-height: 1;
@@ -2905,8 +3026,8 @@ html.dark .hljs-function { color: #61afef; }
 
 /* ---- 旋转按钮 ---- */
 .lightbox-rotate-btn {
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2922,7 +3043,7 @@ html.dark .hljs-function { color: #61afef; }
 
 .lightbox-rotate-btn:hover {
   background: oklch(100% 0 0 / 0.18);
-  color: #fff;
+  color: var(--text-on-accent);
   transform: scale(1.1);
 }
 
@@ -2935,7 +3056,7 @@ html.dark .hljs-function { color: #61afef; }
   padding: 4px 12px;
   background: oklch(0% 0 0 / 0.5);
   border-radius: 12px;
-  color: #fff;
+  color: var(--text-on-accent);
   font-family: var(--font-ui);
   font-size: var(--text-caption);
   font-feature-settings: "tnum";
@@ -2956,7 +3077,7 @@ html.dark .hljs-function { color: #61afef; }
 @media (max-width: 600px) {
   .lightbox-prev,
   .lightbox-next {
-    width: 36px;
+    width: 44px;
     height: 48px;
     font-size: 28px;
     opacity: 0.6;
@@ -2968,8 +3089,8 @@ html.dark .hljs-function { color: #61afef; }
   .lightbox-close {
     top: 16px;
     right: 16px;
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
     font-size: 20px;
   }
 
@@ -2979,8 +3100,8 @@ html.dark .hljs-function { color: #61afef; }
   }
 
   .lightbox-rotate-btn {
-    width: 28px;
-    height: 28px;
+    width: 44px;
+    height: 44px;
     font-size: 14px;
   }
 
@@ -2993,3 +3114,4 @@ html.dark .hljs-function { color: #61afef; }
   }
 }
 html.dark .hljs-title { color: #61afef; }
+

@@ -38,7 +38,7 @@
         }
 
         // 2. 正文独立图片
-        var imgs = document.querySelectorAll('.single-content img, .single-hero-img');
+        var imgs = document.querySelectorAll('.single-content img, .single-hero-img, .single-photo-img');
         for (var j = 0; j < imgs.length; j++) {
             if (imgs[j].closest('a[data-lightbox]')) continue;
             var src = imgs[j].currentSrc || imgs[j].src;
@@ -294,7 +294,7 @@
         }
 
         // 2. 正文图片
-        var img = e.target.closest('.single-content img, .single-hero-img');
+        var img = e.target.closest('.single-content img, .single-hero-img, .single-photo-img');
         if (!img) return;
 
         // 包裹在普通链接中 → 用链接 href

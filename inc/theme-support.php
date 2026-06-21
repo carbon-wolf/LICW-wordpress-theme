@@ -39,6 +39,7 @@ function li_cw_theme_setup() {
     add_image_size( 'blog-card', 300, 200, true );
     add_image_size( 'project-thumb', 560, 350, true );
     add_image_size( 'single-hero', 1200, 400, true );
+    add_image_size( 'photo-thumb', 400, 400, true );
 }
 add_action( 'after_setup_theme', 'li_cw_theme_setup' );
 // 开启WordPress原生链接管理器（友情链接专用）
