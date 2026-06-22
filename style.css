@@ -436,6 +436,95 @@ button {
   border-radius: 1px;
 }
 
+/* ============================================
+   4a. 二级子菜单（桌面端悬停下拉）
+   ============================================ */
+
+/* 父级菜单项 — 相对定位锚点 */
+.main-nav .menu-item-has-children {
+  position: relative;
+}
+
+/* 下拉箭头指示器（::before 避免与 .current-menu-item::after 金线冲突） */
+.main-nav .menu-item-has-children > a::before {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+  margin-right: 6px;
+  opacity: 0.45;
+  transition: transform 0.2s ease, opacity 0.2s;
+  vertical-align: middle;
+  order: 1;
+}
+
+.main-nav .menu-item-has-children:hover > a::before {
+  transform: translateY(1px) rotate(-135deg);
+  opacity: 0.8;
+}
+
+/* 下拉菜单容器 */
+.main-nav .sub-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  min-width: 150px;
+  background: var(--bg-page);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: var(--space-xs) 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  z-index: 110;
+}
+
+/* 悬停显示 */
+.main-nav .menu-item-has-children:hover > .sub-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* 子菜单链接 */
+.main-nav .sub-menu .menu-item {
+  display: block;
+}
+
+.main-nav .sub-menu a {
+  display: block;
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.main-nav .sub-menu a:hover {
+  background: var(--bg-card);
+  color: var(--accent-gold-hover);
+  text-decoration: none;
+}
+
+/* 子菜单当前项高亮 */
+.main-nav .sub-menu .current-menu-item > a {
+  color: var(--accent-gold-hover);
+}
+
+/* 子菜单中不显示 ::after 底部金线 */
+.main-nav .sub-menu .current-menu-item > a::after {
+  display: none;
+}
+
 .header-actions {
   display: flex;
   align-items: center;
@@ -562,6 +651,57 @@ button {
 
   .main-nav .current-menu-item > a::after {
     display: none;
+  }
+
+  /* 移动端子菜单 — 可展开/折叠 */
+  .main-nav .menu-item-has-children > a::before {
+    content: "";
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: translateY(-2px) rotate(45deg);
+    margin-right: 6px;
+    opacity: 0.45;
+    transition: transform 0.25s ease;
+    vertical-align: middle;
+  }
+
+  .main-nav .menu-item-has-children.is-expanded > a::before {
+    transform: translateY(1px) rotate(-135deg);
+    opacity: 0.8;
+  }
+
+  .main-nav .sub-menu {
+    position: static;
+    transform: none;
+    opacity: 1;
+    visibility: visible;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    align-items: center;
+    min-width: auto;
+  }
+
+  .main-nav .menu-item-has-children.is-expanded > .sub-menu {
+    max-height: 600px;
+  }
+
+  .main-nav .sub-menu a {
+    padding: var(--space-xs) var(--space-md);
+    font-size: var(--text-meta);
+    color: var(--text-secondary);
   }
 }
 

@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                 'container'      => false,
                 'menu_class'     => '',
                 'fallback_cb'    => false,
-                'depth'          => 1,
+                'depth'          => 2,
             ));
             ?>
         </nav>

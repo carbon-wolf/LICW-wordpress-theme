@@ -21,9 +21,6 @@ get_header();
         <article class="single-photo">
             <!-- 照片头部 -->
             <header class="single-header reveal">
-                <div class="single-meta">
-                    <?php echo get_the_date(); ?>
-                </div>
 
                 <h1 class="single-title"><?php the_title(); ?></h1>
 
@@ -41,11 +38,6 @@ get_header();
                 </div>
                 <?php endif; ?>
             </header>
-
-            <!-- 全尺寸照片 -->
-            <?php if ( has_post_thumbnail() ) : ?>
-                <?php the_post_thumbnail( 'full', array( 'class' => 'single-photo-img', 'alt' => the_title_attribute( 'echo=0' ) ) ); ?>
-            <?php endif; ?>
 
             <div class="single-body">
                 <!-- 照片简介 -->

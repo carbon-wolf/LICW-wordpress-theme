@@ -15,9 +15,21 @@ document.addEventListener('DOMContentLoaded', function() {
             navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
         });
 
-        // 点击菜单链接后自动关闭
+        // 点击菜单链接后自动关闭（父级菜单项改为展开子菜单）
         mainNav.querySelectorAll('a').forEach(function(link) {
-            link.addEventListener('click', function() {
+            link.addEventListener('click', function(e) {
+                var parentItem = link.parentNode;
+                var isParent = parentItem.classList.contains('menu-item-has-children');
+                var navOpen = mainNav.classList.contains('is-open');
+
+                if (isParent && navOpen) {
+                    // 移动端：切换子菜单展开/折叠，不关闭导航面板
+                    e.preventDefault();
+                    parentItem.classList.toggle('is-expanded');
+                    return;
+                }
+
+                // 普通链接或子菜单链接：关闭导航面板后正常跳转
                 mainNav.classList.remove('is-open');
                 navToggle.classList.remove('is-open');
                 navToggle.setAttribute('aria-expanded', 'false');
