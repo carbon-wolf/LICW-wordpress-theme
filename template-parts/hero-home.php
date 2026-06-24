@@ -1,7 +1,6 @@
 <?php
 /**
  * 首页欢迎 Hero 区块
- * 修复：主图显示逻辑，适配自定义器URL存储
  */
 if ( ! defined( 'ABSPATH' ) ) exit;
 
@@ -17,6 +16,7 @@ $about_page = get_page_by_path( 'about' );
 $default_about_link = $about_page ? get_permalink( $about_page ) : '#';
 $btn2_link = li_cw_get_option( 'li_cw_home_btn2_link', $default_about_link );
 $hero_img = li_cw_get_option( 'li_cw_home_hero_image' );
+$hero_img = $hero_img ? li_cw_fix_asset_url( $hero_img ) : '';
 ?>
 
 <section class="home-hero">
@@ -45,7 +45,7 @@ $hero_img = li_cw_get_option( 'li_cw_home_hero_image' );
 
     <?php if ( $hero_img ) : ?>
         <div class="hero-image">
-            <img src="<?php echo esc_url( $hero_img ); ?>" alt="<?php echo esc_attr( $title ); ?>" 
+            <img src="<?php echo esc_url( $hero_img ); ?>" alt="<?php echo esc_attr( $title ); ?>"
                  style="width: 100%; height: auto; max-height: 500px; object-fit: cover; border-radius: var(--radius);">
         </div>
     <?php endif; ?>

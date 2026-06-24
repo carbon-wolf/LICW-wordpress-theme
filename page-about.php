@@ -6,6 +6,7 @@
 get_header();
 
 $avatar   = li_cw_get_option( 'li_cw_about_avatar' );
+$avatar   = $avatar ? li_cw_fix_asset_url( $avatar ) : '';
 $name     = li_cw_get_option( 'li_cw_about_name', 'Li CW' );
 $title    = li_cw_get_option( 'li_cw_about_title', '高中生开发者 / 写作者' );
 $desc     = li_cw_get_option( 'li_cw_about_desc' );

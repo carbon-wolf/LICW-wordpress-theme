@@ -19,6 +19,10 @@ get_header();
                 <div class="single-meta">
                     <?php echo get_the_date(); ?>
                     <?php
+                    $reading_time = li_cw_get_reading_time();
+                    if ( $reading_time ) {
+                        echo ' · ' . esc_html( $reading_time ) . esc_html__( ' 分钟', 'li-cw' );
+                    }
                     $tag = li_cw_get_blog_tag( get_the_ID() );
                     if ( $tag ) echo ' · ' . esc_html( $tag );
                     $tags = get_the_tags();

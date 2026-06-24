@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // 主题版本号，用于缓存刷新
-define( 'LI_CW_VERSION', '1.1.3' );
+define( 'LI_CW_VERSION', '1.1.5' );
 define( 'LI_CW_THEME_DIR', get_template_directory() );
 define( 'LI_CW_THEME_URI', get_template_directory_uri() );
 
@@ -29,6 +29,7 @@ require_once LI_CW_THEME_DIR . '/inc/cpt-shuoshuo.php';     // 说说 CPT
 require_once LI_CW_THEME_DIR . '/inc/cpt-photo.php';       // 照片 CPT
 require_once LI_CW_THEME_DIR . '/inc/lightbox.php';        // 图片灯箱
 require_once LI_CW_THEME_DIR . '/inc/toc.php';             // 文章目录
+require_once LI_CW_THEME_DIR . '/inc/og-meta.php';           // Open Graph / Twitter Card
 
 /**
  * 加载主题样式与脚本

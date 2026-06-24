@@ -12,8 +12,18 @@ __MACOSX
 *.zip
 *.rar
 
-# Claude Code 辅助文件
+# Claude Code / OpenCode 辅助文件
 CLAUDE.md
 CSS_INDEX.md
 .design-context.md
 .claude/
+AGENTS.md
+opencode.json
+opencode.jsonc
+.opencode/
+
+# 配置文件（防止泄露）
+.env
+.env.*
+*.local
+*.code-workspace

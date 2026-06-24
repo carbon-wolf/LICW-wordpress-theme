@@ -135,6 +135,23 @@ function li_cw_register_customizer( $wp_customize ) {
     ));
 
 
+    // ========== 1.5. 社交分享 OG 设置 ==========
+    $wp_customize->add_section( 'li_cw_section_og', array(
+        'title'    => esc_html__( '社交分享设置', 'li-cw' ),
+        'priority' => 25,
+    ));
+
+    $wp_customize->add_setting( 'li_cw_og_default_image', array(
+        'default'           => '',
+        'sanitize_callback' => 'esc_url_raw',
+    ));
+    $wp_customize->add_control( new WP_Customize_Image_Control( $wp_customize, 'li_cw_og_default_image', array(
+        'section'     => 'li_cw_section_og',
+        'label'       => esc_html__( '默认分享图', 'li-cw' ),
+        'description' => esc_html__( '文章无特色图时用于社交分享卡片，建议 1200×630 像素', 'li-cw' ),
+    )));
+
+
     // ========== 2. 配色设置 ==========
     $wp_customize->add_section( 'li_cw_section_colors', array(
         'title'       => esc_html__( '配色设置', 'li-cw' ),

@@ -1,6 +1,6 @@
 <?php
 /**
- * 主索引模板（兜底文件）
+ * 主索引模板
  * WordPress 主题必备，作为所有页面的最终回退模板
  * @package Li_CW_Theme
  */

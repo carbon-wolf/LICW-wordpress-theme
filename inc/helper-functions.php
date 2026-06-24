@@ -17,6 +17,42 @@ function li_cw_get_option( $key, $default = '' ) {
 }
 
 /**
+ * 修正资源 URL 的协议与域名，避免 https 页面出现混合内容
+ * - http:// 升级为 https://
+ * - 指向本站旧域名/IP 的 wp-content 资源，强制替换为当前站点域名
+ * @param string $url 原始 URL
+ * @return string 修正后的 URL
+ */
+function li_cw_fix_asset_url( $url ) {
+    if ( ! $url || ! is_string( $url ) ) {
+        return $url;
+    }
+
+    $home = wp_parse_url( home_url() );
+    $scheme = isset( $home['scheme'] ) ? $home['scheme'] : 'https';
+    $host   = isset( $home['host'] ) ? $home['host'] : '';
+
+    $parts = wp_parse_url( $url );
+    $url_host = isset( $parts['host'] ) ? $parts['host'] : '';
+    $url_path = isset( $parts['path'] ) ? $parts['path'] : '';
+
+    // /wp-content/ 与 /wp-includes/ 必为本站资源，无论 host 是否匹配都规范化
+    $is_local_path = ( strpos( $url_path, '/wp-content/' ) === 0 || strpos( $url_path, '/wp-includes/' ) === 0 );
+
+    if ( $is_local_path && $url_host !== $host ) {
+        $query = isset( $parts['query'] ) ? '?' . $parts['query'] : '';
+        return $scheme . '://' . $host . $url_path . $query;
+    }
+
+    // host 一致：仅升级协议
+    if ( $url_host === $host && $scheme === 'https' && strpos( $url, 'http://' ) === 0 ) {
+        return 'https://' . substr( $url, 7 );
+    }
+
+    return $url;
+}
+
+/**
  * 生成自定义配色内联CSS
  * 从自定义器读取设置，覆盖CSS变量
  * @return string
@@ -82,4 +118,29 @@ function li_cw_get_project_status( $post_id = null ) {
     $post_id = $post_id ? $post_id : get_the_ID();
     $status = get_post_meta( $post_id, 'li_cw_project_status', true );
     return $status ? esc_html( $status ) : esc_html__( '已完成', 'li-cw' );
+}
+
+/**
+ * 计算文章阅读时间（分钟）
+ * 中文按 300 字/分钟、英文按 200 词/分钟综合估算
+ * @param int|null $post_id
+ * @return int 至少为 1
+ */
+function li_cw_get_reading_time( $post_id = null ) {
+    $post = get_post( $post_id );
+    if ( ! $post ) {
+        return 1;
+    }
+
+    $content = $post->post_content;
+    $content = strip_shortcodes( $content );
+    $content = wp_strip_all_tags( $content );
+
+    // 中文字符（含 CJK 扩展 A 区）
+    $chinese_count = preg_match_all( '/[\x{4e00}-\x{9fff}\x{3400}-\x{4dbf}]/u', $content );
+    // 英文单词数
+    $word_count = str_word_count( $content );
+
+    $minutes = (int) ceil( ( $chinese_count / 300 ) + ( $word_count / 200 ) );
+    return max( 1, $minutes );
 }
