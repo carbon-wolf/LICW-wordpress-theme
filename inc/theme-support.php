@@ -40,6 +40,7 @@ function li_cw_theme_setup() {
     add_image_size( 'project-thumb', 560, 350, true );
     add_image_size( 'single-hero', 1200, 400, true );
     add_image_size( 'photo-thumb', 400, 400, true );
+    add_image_size( 'photo-wall', 400, 9999, false ); // 瀑布流专用：等宽不等高，保持原图比例
 }
 add_action( 'after_setup_theme', 'li_cw_theme_setup' );
 // 开启WordPress原生链接管理器（友情链接专用）

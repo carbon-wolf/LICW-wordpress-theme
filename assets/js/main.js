@@ -314,4 +314,83 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
+
+    // ========== 照片墙瀑布流 (Masonry) ==========
+    var masonryGrid = document.getElementById('masonry-grid');
+    if (masonryGrid && typeof Masonry !== 'undefined') {
+        var masonryImgs = masonryGrid.querySelectorAll('img');
+        var loadedCount = 0;
+        var totalImages = masonryImgs.length;
+
+        function initMasonry() {
+            var msnry = new Masonry(masonryGrid, {
+                itemSelector: '.masonry-item',
+                columnWidth: '.grid-sizer',
+                gutter: '.gutter-sizer',
+                percentPosition: true,
+                stagger: 30,
+                transitionDuration: '0.4s'
+            });
+
+            // 图片加载完成后重新布局
+            masonryImgs.forEach(function(img) {
+                if (img.complete) {
+                    loadedCount++;
+                } else {
+                    img.addEventListener('load', function() {
+                        loadedCount++;
+                        if (loadedCount >= totalImages) msnry.layout();
+                    });
+                    img.addEventListener('error', function() {
+                        loadedCount++;
+                        if (loadedCount >= totalImages) msnry.layout();
+                    });
+                }
+            });
+
+            if (loadedCount >= totalImages) {
+                msnry.layout();
+            }
+
+            // 延迟重布局，处理异步加载
+            setTimeout(function() { msnry.layout(); }, 500);
+
+            // 窗口 resize 时重新计算布局
+            var resizeTimer;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(function() { msnry.layout(); }, 250);
+            });
+
+            // Masonry 布局完成后触发 reveal
+            setTimeout(function() {
+                masonryGrid.querySelectorAll('.reveal:not(.is-revealed)').forEach(function(el) {
+                    el.classList.add('is-revealed');
+                });
+            }, 600);
+
+            // 骨架屏：图片加载完成后标记 is-loaded
+            masonryGrid.querySelectorAll('.photo-thumb img').forEach(function(img) {
+                if (img.complete) {
+                    var thumb = img.closest('.photo-thumb');
+                    if (thumb) thumb.classList.add('is-loaded');
+                } else {
+                    img.addEventListener('load', function() {
+                        var thumb = img.closest('.photo-thumb');
+                        if (thumb) thumb.classList.add('is-loaded');
+                    });
+                    img.addEventListener('error', function() {
+                        var thumb = img.closest('.photo-thumb');
+                        if (thumb) thumb.classList.add('is-loaded');
+                    });
+                }
+            });
+        }
+
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(initMasonry);
+        } else {
+            setTimeout(initMasonry, 100);
+        }
+    }
 });

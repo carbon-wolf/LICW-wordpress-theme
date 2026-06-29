@@ -106,6 +106,7 @@ if ( post_password_required() ) return;
  */
 function li_cw_simple_comment( $comment, $args, $depth ) {
     $is_reply = ( $depth > 1 );
+    $is_pinned = ! $is_reply && get_comment_meta( $comment->comment_ID, 'li_cw_pinned', true );
     $parent_author = '';
     if ( $is_reply ) {
         $parent_comment = get_comment( $comment->comment_parent );
@@ -114,11 +115,14 @@ function li_cw_simple_comment( $comment, $args, $depth ) {
         }
     }
     ?>
-    <li <?php comment_class(); ?> id="comment-<?php comment_ID(); ?>">
+    <li <?php comment_class( $is_pinned ? 'is-pinned' : '' ); ?> id="comment-<?php comment_ID(); ?>">
         <div class="comment-body">
             <div class="comment-author">
                 <?php echo get_avatar( $comment, 32 ); ?>
                 <span class="fn"><?php echo get_comment_author(); ?></span>
+                <?php if ( $is_pinned ) : ?>
+                    <span class="comment-pinned-badge"><?php esc_html_e( '置顶', 'li-cw' ); ?></span>
+                <?php endif; ?>
             </div>
             <div class="comment-meta">
                 <?php echo get_comment_date(); ?>

@@ -2,6 +2,7 @@
  * 图片灯箱
  * 点击正文图片弹出全屏查看，支持左右键导航、计数器、加载动画
  * 支持鼠标滚轮缩放、双指缩放旋转、按钮/键盘旋转
+ * 支持鼠标拖拽平移（放大后）、单指滑动切换图片、双击缩放切换
  */
 (function () {
     'use strict';
@@ -13,7 +14,11 @@
     /* ---- 变换状态 ---- */
     var currentZoom = 1;
     var currentRotation = 0;
+    var currentX = 0;       // 平移偏移 px
+    var currentY = 0;
     var touchData = null;   // 双指触摸起始数据
+    var dragData = null;    // 鼠标拖拽 { startX, startY, originX, originY }
+    var swipeData = null;   // 单指滑动 { startX, startY, startTime, moved }
     var zoomIndicatorTimer = null;
 
     /* ---- 工具：去 WordPress 尺寸后缀 ---- */
@@ -81,7 +86,8 @@
         var img = getImg();
         if (!img) return;
         img.style.transition = 'none';
-        img.style.transform = 'scale(' + currentZoom + ') rotate(' + currentRotation + 'deg)';
+        img.style.transform = 'translate(' + currentX + 'px, ' + currentY + 'px) scale(' + currentZoom + ') rotate(' + currentRotation + 'deg)';
+        if (!dragData) img.style.cursor = currentZoom > 1.05 ? 'grab' : '';
         showZoomIndicator();
     }
 
@@ -89,12 +95,17 @@
     function resetTransform() {
         currentZoom = 1;
         currentRotation = 0;
+        currentX = 0;
+        currentY = 0;
         var img = getImg();
         if (img) {
             img.style.transform = '';
             img.style.transition = '';
+            img.style.cursor = '';
         }
         touchData = null;
+        dragData = null;
+        swipeData = null;
     }
 
     /* ---- 创建遮罩 DOM（单例）---- */
@@ -158,6 +169,12 @@
 
         // 滚轮缩放 / Alt+滚轮旋转
         var img = overlay.querySelector('.lightbox-img');
+
+        // 禁用原生图片拖拽，避免干扰灯箱内的平移/滑动操作
+        img.draggable = false;
+        img.addEventListener('dragstart', function (e) {
+            e.preventDefault();
+        });
         img.addEventListener('wheel', function (e) {
             e.preventDefault();
             if (e.altKey) {
@@ -167,16 +184,21 @@
                 // 滚轮 → 缩放（Ctrl+滚轮为触控板双指缩放，灵敏度更高）
                 var sensitivity = e.ctrlKey ? 0.01 : 0.0015;
                 currentZoom *= Math.exp(-e.deltaY * sensitivity);
-                currentZoom = Math.min(5, Math.max(0.3, currentZoom));
+                currentZoom = Math.min(8, Math.max(0.3, currentZoom));
             }
             updateTransform();
         }, { passive: false });
 
-        // 双击重置
+        // 双击：未放大→放大到 2x，已放大→重置
         img.addEventListener('dblclick', function () {
-            resetTransform();
-            var indicator = overlay.querySelector('.lightbox-zoom-indicator');
-            if (indicator) indicator.classList.remove('is-visible');
+            if (currentZoom > 1.05) {
+                resetTransform();
+            } else {
+                currentZoom = 2;
+                currentX = 0;
+                currentY = 0;
+                updateTransform();
+            }
         });
 
         // 双指触摸：缩放 + 旋转
@@ -200,7 +222,7 @@
                 var newDist = Math.hypot(dx, dy);
                 var newAngle = Math.atan2(dy, dx) * 180 / Math.PI;
 
-                currentZoom = Math.min(5, Math.max(0.3, touchData.startZoom * (newDist / touchData.startDist)));
+                currentZoom = Math.min(8, Math.max(0.3, touchData.startZoom * (newDist / touchData.startDist)));
                 currentRotation = touchData.startRotation + (newAngle - touchData.startAngle);
                 updateTransform();
                 e.preventDefault();
@@ -209,6 +231,103 @@
 
         img.addEventListener('touchend', function (e) {
             if (e.touches.length < 2) touchData = null;
+        });
+
+        // --- 单指触摸：未放大时左右滑切换图片，放大后拖动平移 ---
+        img.addEventListener('touchstart', function (e) {
+            if (e.touches.length !== 1 || touchData) return;
+            swipeData = {
+                startX: e.touches[0].clientX,
+                startY: e.touches[0].clientY,
+                startTime: Date.now(),
+                moved: false,
+                dragging: false,
+                originX: currentX,
+                originY: currentY
+            };
+        }, { passive: true });
+
+        img.addEventListener('touchmove', function (e) {
+            if (!swipeData || e.touches.length !== 1) return;
+
+            var dx = e.touches[0].clientX - swipeData.startX;
+            var dy = e.touches[0].clientY - swipeData.startY;
+
+            // 判断方向：首次位移超 10px 时决定是水平滑动还是垂直拖拽
+            if (!swipeData.moved && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) {
+                swipeData.moved = true;
+                // 放大后 → 拖拽模式；未放大且水平为主 → 滑动模式
+                swipeData.dragging = (currentZoom > 1.05);
+                if (!swipeData.dragging && Math.abs(dx) > Math.abs(dy)) {
+                    // 水平滑动：阻止默认滚动
+                    e.preventDefault();
+                }
+            }
+
+            if (!swipeData.moved) return;
+
+            if (swipeData.dragging) {
+                // 拖拽平移
+                e.preventDefault();
+                currentX = swipeData.originX + dx;
+                currentY = swipeData.originY + dy;
+                updateTransform();
+            } else if (Math.abs(dx) > Math.abs(dy)) {
+                // 水平滑动视觉反馈（轻微跟随手指）
+                img.style.transition = 'none';
+                img.style.transform = 'translateX(' + dx * 0.4 + 'px) scale(1)';
+            }
+        }, { passive: false });
+
+        img.addEventListener('touchend', function (e) {
+            if (!swipeData) return;
+            var dx = 0, elapsed = 0;
+            if (swipeData.moved && !swipeData.dragging) {
+                dx = (e.changedTouches[0] ? e.changedTouches[0].clientX : 0) - swipeData.startX;
+                elapsed = Date.now() - swipeData.startTime;
+            }
+
+            var sd = swipeData;
+            swipeData = null;
+
+            if (sd.dragging) return; // 拖拽模式不触发导航
+
+            // 快速短滑 或 长距离滑动 → 切换图片
+            if (Math.abs(dx) > 50 || (Math.abs(dx) > 20 && elapsed < 300)) {
+                navigate(dx > 0 ? -1 : 1);
+            } else {
+                // 未触发导航，恢复原位
+                img.style.transition = '';
+                img.style.transform = '';
+            }
+        }, { passive: true });
+
+        // --- 鼠标拖拽：放大后拖动平移 ---
+        img.addEventListener('mousedown', function (e) {
+            if (currentZoom <= 1.05) return; // 未放大时不拖拽
+            e.preventDefault();
+            img.style.cursor = 'grabbing';
+            dragData = {
+                startX: e.clientX,
+                startY: e.clientY,
+                originX: currentX,
+                originY: currentY
+            };
+        });
+
+        document.addEventListener('mousemove', function (e) {
+            if (!dragData) return;
+            e.preventDefault();
+            currentX = dragData.originX + (e.clientX - dragData.startX);
+            currentY = dragData.originY + (e.clientY - dragData.startY);
+            updateTransform();
+        });
+
+        document.addEventListener('mouseup', function () {
+            if (!dragData) return;
+            dragData = null;
+            var imgEl = getImg();
+            if (imgEl) imgEl.style.cursor = currentZoom > 1.05 ? 'grab' : '';
         });
 
         return overlay;

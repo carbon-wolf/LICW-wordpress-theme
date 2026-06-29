@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // 主题版本号，用于缓存刷新
-define( 'LI_CW_VERSION', '1.1.5' );
+define( 'LI_CW_VERSION', '1.1.6' );
 define( 'LI_CW_THEME_DIR', get_template_directory() );
 define( 'LI_CW_THEME_URI', get_template_directory_uri() );
 
@@ -48,6 +48,17 @@ function li_cw_enqueue_assets() {
 
     // 主交互脚本 - 页脚加载，不阻塞渲染
     wp_enqueue_script( 'li-cw-main', LI_CW_THEME_URI . '/assets/js/main.js', array(), LI_CW_VERSION, true );
+
+    // Masonry.js — 瀑布流布局（仅照片墙页面加载，本地化避免 CDN 阻塞）
+    if ( is_page_template( 'page-gallery.php' ) ) {
+        wp_enqueue_script(
+            'masonry',
+            LI_CW_THEME_URI . '/assets/js/vendor/masonry.pkgd.min.js',
+            array(),
+            '4.2.2',
+            true
+        );
+    }
 
     // 暗色模式脚本 - 头部提前加载，避免页面闪烁
     wp_enqueue_script( 'li-cw-darkmode', LI_CW_THEME_URI . '/assets/js/darkmode.js', array(), LI_CW_VERSION, false );

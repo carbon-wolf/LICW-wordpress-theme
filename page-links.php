@@ -1,7 +1,6 @@
 <?php
 /**
  * Template Name: 友链页面
- * 调用WordPress原生链接管理器，无限添加，后台直接管理
  */
 get_header();
 ?>
@@ -58,6 +57,18 @@ get_header();
             endif;
             ?>
         </div>
+
+        <?php
+        if ( li_cw_get_option( 'li_cw_links_comments', false ) ) :
+            global $post;
+            $orig_status = $post->comment_status;
+            $post->comment_status = 'open';
+            add_filter( 'comments_open', '__return_true' );
+            comments_template();
+            remove_filter( 'comments_open', '__return_true' );
+            $post->comment_status = $orig_status;
+        endif;
+        ?>
     </div>
 </main>
 

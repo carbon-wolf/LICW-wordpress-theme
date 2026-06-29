@@ -364,6 +364,23 @@ function li_cw_register_customizer( $wp_customize ) {
         'description' => '支持 HTML 标签，可添加统计代码、徽章、额外链接等。留空则不显示。',
     ));
 
+    // ========== 4.5. 友链页设置 ==========
+    $wp_customize->add_section( 'li_cw_section_links', array(
+        'title'    => esc_html__( '友链页设置', 'li-cw' ),
+        'priority' => 48,
+    ));
+
+    $wp_customize->add_setting( 'li_cw_links_comments', array(
+        'default'           => false,
+        'sanitize_callback' => 'wp_validate_boolean',
+    ));
+    $wp_customize->add_control( 'li_cw_links_comments', array(
+        'section' => 'li_cw_section_links',
+        'label'   => esc_html__( '开启评论', 'li-cw' ),
+        'type'    => 'checkbox',
+    ));
+
+
     // ========== 5.5. 说说设置 ==========
     $wp_customize->add_section( 'li_cw_section_shuoshuo', array(
         'title'       => esc_html__( '说说设置', 'li-cw' ),

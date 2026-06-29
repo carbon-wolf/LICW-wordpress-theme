@@ -3,7 +3,7 @@ Theme Name: Li CW 创作主题
 Theme URI: https://github.com/carbon-wolf/LICW-wordpress-theme
 Author: 林泽凯
 Description: 极简优雅的个人创作博客主题，适配写作、作品展示
-Version: 1.1.5
+Version: 1.1.6
 License: GNU General Public License v2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: 极简, 博客, 作品集, 暗色模式, 响应式
@@ -94,7 +94,7 @@ Tags: 极简, 博客, 作品集, 暗色模式, 响应式
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
   --radius: 4px;
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 8px oklch(0% 0 0 / 0.04);
 }
 
 html.dark {
@@ -129,7 +129,7 @@ html.dark {
   --color-info: oklch(65% 0.05 200);
   --color-info-bg: oklch(25% 0.02 200);
 
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 2px 8px oklch(0% 0 0 / 0.18);
 
   /* 暗色模式：浅色文字在深色背景上需要额外 0.05 行高补偿 */
   --leading-body: 1.75;
@@ -484,7 +484,7 @@ button {
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8px 24px oklch(0% 0 0 / 0.06);
   z-index: 110;
 }
 
@@ -1767,6 +1767,29 @@ pre::-webkit-scrollbar-thumb:hover {
   margin-bottom: var(--space-lg);
 }
 
+/* 照片总数 badge — 画廊页专用 */
+.gallery-count-badge {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: var(--space-xs);
+  font-family: var(--font-ui);
+  color: var(--text-secondary);
+}
+
+.gallery-count-num {
+  font-family: var(--font-heading);
+  font-size: var(--text-heading);
+  font-weight: 700;
+  color: var(--accent-gold);
+  line-height: 1;
+}
+
+.gallery-count-label {
+  font-size: var(--text-meta);
+  color: var(--text-secondary);
+}
+
 /* ============================================
    11. 分页
    ============================================ */
@@ -1781,9 +1804,9 @@ pre::-webkit-scrollbar-thumb:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 32px;
-  height: 32px;
-  padding: 0 10px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 12px;
   border: 1px solid var(--border-color);
   border-radius: var(--radius);
   font-size: var(--text-meta);
@@ -1840,12 +1863,13 @@ pre::-webkit-scrollbar-thumb:hover {
   color: var(--text-primary);
   font-family: var(--font-ui);
   font-size: var(--text-body);
-  outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.search-modal input:focus {
+.search-modal input:focus-visible {
   border-color: var(--accent-gold);
+  box-shadow: 0 0 0 3px oklch(68% 0.09 82 / 0.25);
+  outline: none;
 }
 
 .search-close {
@@ -1956,6 +1980,35 @@ pre::-webkit-scrollbar-thumb:hover {
 /* 子评论回复链接 */
 .comment-list .children .comment-reply-link {
   font-size: var(--text-caption);
+}
+
+/* 置顶评论 — 金线左缘 + 置顶徽标 */
+.comment.is-pinned > .comment-body {
+  border-left: 3px solid var(--accent-gold);
+  padding-left: var(--space-sm);
+  background: linear-gradient(
+    to right,
+    oklch(68% 0.09 82 / 0.06) 0%,
+    transparent 60%
+  );
+  border-radius: 0 4px 4px 0;
+}
+
+.comment-pinned-badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--accent-gold);
+  background: oklch(68% 0.09 82 / 0.12);
+  border: 1px solid oklch(68% 0.09 82 / 0.3);
+  border-radius: 3px;
+  padding: 1px 6px;
+  margin-left: 6px;
+  vertical-align: middle;
+  line-height: 1.5;
 }
 
 /* 子评论头像 */
@@ -2103,7 +2156,7 @@ pre::-webkit-scrollbar-thumb:hover {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.4);
+  background: oklch(0% 0 0 / 0.4);
   backdrop-filter: blur(2px);
 }
 
@@ -2113,7 +2166,7 @@ pre::-webkit-scrollbar-thumb:hover {
   max-width: 480px;
   background: var(--bg-card);
   border-radius: var(--radius);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 40px oklch(0% 0 0 / 0.12);
   overflow: hidden;
   animation: modalIn 0.2s ease;
 }
@@ -2219,13 +2272,14 @@ pre::-webkit-scrollbar-thumb:hover {
   color: var(--text-primary);
   font-family: var(--font-body);
   font-size: var(--text-body);
-  outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.comment-modal-body input:focus,
-.comment-modal-body textarea:focus {
+.comment-modal-body input:focus-visible,
+.comment-modal-body textarea:focus-visible {
   border-color: var(--accent-gold);
+  box-shadow: 0 0 0 3px oklch(68% 0.09 82 / 0.25);
+  outline: none;
 }
 
 .comment-modal-body textarea {
@@ -2427,6 +2481,50 @@ pre::-webkit-scrollbar-thumb:hover {
 
   .about-wrap::after {
     margin-top: var(--space-xl);
+  }
+}
+
+/* 平板 & 桌面 ≥601px — 4 列宽窄交错 */
+/* 平板 & 桌面 ≥601px — 8 单位比例网格，卡片跟着图片大小走 */
+@media (min-width: 601px) {
+  /* 列宽单位: 1/8 容器 */
+  .photos-grid .grid-sizer {
+    width: calc((100% - 7 * var(--masonry-gutter)) / 8);
+  }
+
+  /* 默认/u2 — 竖图/方图: 1/4 宽 */
+  .photos-grid .masonry-item {
+    width: calc((100% - 3 * var(--masonry-gutter)) / 4);
+  }
+
+  /* u3 — 微宽: 3/8 宽 */
+  .photos-grid .masonry-item--u3 {
+    width: calc((300% - 5 * var(--masonry-gutter)) / 8);
+  }
+
+  /* u4 — 半宽: 1/2 宽 */
+  .photos-grid .masonry-item--u4 {
+    width: calc((100% - var(--masonry-gutter)) / 2);
+  }
+
+  /* u5 — 宽图: 5/8 宽 */
+  .photos-grid .masonry-item--u5 {
+    width: calc((500% - 3 * var(--masonry-gutter)) / 8);
+  }
+
+  /* u6 — 横图: 3/4 宽 */
+  .photos-grid .masonry-item--u6 {
+    width: calc((300% - var(--masonry-gutter)) / 4);
+  }
+
+  /* u7 — 宽横图: 7/8 宽 */
+  .photos-grid .masonry-item--u7 {
+    width: calc((700% - var(--masonry-gutter)) / 8);
+  }
+
+  /* u8 — 全景: 整行 */
+  .photos-grid .masonry-item--u8 {
+    width: 100%;
   }
 }
 
@@ -2672,6 +2770,22 @@ pre::-webkit-scrollbar-thumb:hover {
   .comment-list .children .comment-content,
   .comment-list .children .comment-reply {
     padding-left: 28px;
+  }
+
+  /* 瀑布流 1 列沉浸式 — 手机端全部撑满 */
+  :root {
+    --masonry-gutter: 12px;
+  }
+
+  .photos-grid .grid-sizer,
+  .photos-grid .masonry-item,
+  .photos-grid .masonry-item--u3,
+  .photos-grid .masonry-item--u4,
+  .photos-grid .masonry-item--u5,
+  .photos-grid .masonry-item--u6,
+  .photos-grid .masonry-item--u7,
+  .photos-grid .masonry-item--u8 {
+    width: 100%;
   }
 }
 /* ============================================
@@ -2973,7 +3087,7 @@ html.dark .hljs-function { color: #61afef; }
 
 .photo-excerpt p {
   width: 100%;
-  color: #fff;
+  color: oklch(98% 0 0 / 0.95);
   font-family: var(--font-body);
   font-size: var(--text-meta);
   line-height: var(--leading-relaxed);
@@ -2981,6 +3095,234 @@ html.dark .hljs-function { color: #61afef; }
   word-break: break-word;
   overflow-wrap: break-word;
   white-space: normal;
+}
+
+/* ============================================
+   18b. 瀑布流 Masonry 布局 — 沉浸式
+   ============================================ */
+
+:root {
+  --masonry-gutter: 14px;
+}
+
+/* Masonry 列宽基准 — 绝对定位不参与布局(宽在媒体查询内) */
+.photos-grid .grid-sizer {
+  position: absolute;
+  height: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Masonry 间距基准 — 与 grid-sizer 同样不参与布局 */
+.photos-grid .gutter-sizer {
+  width: var(--masonry-gutter);
+  position: absolute;
+  height: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Masonry item 通用 — margin-bottom 全尺寸共用 */
+.photos-grid .masonry-item {
+  margin-bottom: var(--masonry-gutter);
+}
+
+/* Staggered reveal — 行内级联淡入，每张卡片依次浮现 */
+#masonry-grid .masonry-item .reveal {
+  transition-delay: calc(var(--item-index, 0) * 0.06s);
+}
+
+/* Masonry 接管 */
+#masonry-grid.photos-grid {
+  display: block;
+  position: relative;
+}
+
+#masonry-grid .masonry-item {
+  float: left;
+}
+
+/* --- 照片卡片 — 悬浮无边界 --- */
+#masonry-grid .photo-card {
+  display: inline-block;
+  width: 100%;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 12px;
+}
+
+/* --- 照片链接容器 --- */
+#masonry-grid .photo-link {
+  display: block;
+  position: relative;
+}
+
+/* --- 图片容器 — 自然比例 + 圆角 --- */
+#masonry-grid .photo-thumb {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: transparent;
+  aspect-ratio: auto;
+}
+
+#masonry-grid .photo-thumb img {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: transform 0.55s var(--ease-out), filter 0.55s var(--ease-out);
+}
+
+#masonry-grid .photo-card:hover .photo-thumb img {
+  transform: scale(1.05);
+  filter: brightness(1.06);
+}
+
+/* 悬停时浮现暖金微光 — 内阴影模拟画框光 */
+#masonry-grid .photo-card:hover .photo-thumb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 2px oklch(68% 0.09 82 / 0.35);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* --- 骨架屏 Shimmer --- */
+.photo-skeleton {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: linear-gradient(
+    110deg,
+    var(--border-color) 30%,
+    var(--bg-card) 50%,
+    var(--border-color) 70%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  z-index: 1;
+  pointer-events: none;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.photo-thumb.is-loaded .photo-skeleton {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+/* --- 悬停渐变遮罩 — 画廊标签式 --- */
+.photo-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 40px 14px 12px;
+  background: linear-gradient(
+    to top,
+    oklch(0% 0 0 / 0.62) 0%,
+    oklch(0% 0 0 / 0.25) 60%,
+    transparent 100%
+  );
+  border-radius: 0 0 12px 12px;
+  opacity: 0;
+  transition: opacity 0.35s var(--ease-out);
+  pointer-events: none;
+}
+
+/* 遮罩顶部金色标线 — 画框标签意象 */
+.photo-overlay::before {
+  content: "";
+  display: block;
+  width: 48px;
+  height: 3px;
+  margin: 0 0 10px;
+  background: var(--accent-gold);
+  border-radius: 1px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.45s var(--ease-out) 0.06s;
+}
+
+#masonry-grid .photo-card:hover .photo-overlay {
+  opacity: 1;
+}
+
+#masonry-grid .photo-card:hover .photo-overlay::before {
+  transform: scaleX(1);
+}
+
+.photo-overlay-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-meta);
+  font-weight: 600;
+  color: oklch(98% 0 0 / 0.95);
+  margin: 0 0 4px;
+  text-shadow: 0 1px 4px oklch(0% 0 0 / 0.3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 遮罩内的元信息（日期、地点、相机） */
+.photo-overlay-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+
+.photo-overlay-meta .photo-date,
+.photo-overlay-meta .photo-location,
+.photo-overlay-meta .photo-camera {
+  font-family: var(--font-ui);
+  font-size: var(--text-caption);
+  color: oklch(97% 0 0 / 0.85);
+  text-shadow: 0 1px 3px oklch(0% 0 0 / 0.4);
+}
+
+.photo-overlay-meta .photo-date::before {
+  content: "\1F4C5 ";
+}
+
+.photo-overlay-meta .photo-location::before {
+  content: "\1F4CD ";
+}
+
+.photo-overlay-meta .photo-camera::before {
+  content: "\1F4F7 ";
+}
+
+/* 遮罩内简介 */
+.photo-overlay-excerpt {
+  font-family: var(--font-body);
+  font-size: var(--text-caption);
+  color: oklch(97% 0 0 / 0.92);
+  line-height: var(--leading-relaxed);
+  margin: 6px 0 0;
+  text-shadow: 0 1px 3px oklch(0% 0 0 / 0.5);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* --- 暗色模式微调 --- */
+html.dark .photo-overlay {
+  background: linear-gradient(
+    to top,
+    oklch(0% 0 0 / 0.72) 0%,
+    oklch(0% 0 0 / 0.3) 55%,
+    transparent 100%
+  );
+}
+
+html.dark #masonry-grid .photo-card:hover .photo-thumb::after {
+  box-shadow: inset 0 0 0 2px oklch(75% 0.08 82 / 0.4);
 }
 
 /* ============================================
@@ -3050,12 +3392,17 @@ html.dark .hljs-function { color: #61afef; }
   box-shadow: 0 8px 40px oklch(0% 0 0 / 0.4);
   cursor: default;
   transform: scale(0.95);
-  transition: transform 0.3s var(--ease-out),
-              opacity 0.2s ease;
+  transition: opacity 0.2s ease;
+  /* transform transition 由 JS 控制，避免与拖拽/缩放冲突 */
+  will-change: transform;
+  user-select: none;
+  -webkit-user-drag: none;
+  touch-action: none;
 }
 
 .lightbox-overlay.is-open .lightbox-img {
   transform: scale(1);
+  transition: transform 0.3s var(--ease-out), opacity 0.2s ease;
 }
 
 /* ---- 加载动画 ---- */
