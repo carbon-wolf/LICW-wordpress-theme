@@ -13,10 +13,10 @@ get_header();
     <div class="container">
         <header class="page-header">
             <h1 class="section-title">
-                <span><?php esc_html_e( '照片墙', 'li-cw' ); ?></span>
+                <span><?php echo esc_html( li_cw_get_option( 'li_cw_gallery_title', __( '照片墙', 'li-cw' ) ) ); ?></span>
             </h1>
             <p class="page-subtitle">
-                <?php esc_html_e( '用镜头记录下的瞬间。', 'li-cw' ); ?>
+                <?php echo esc_html( li_cw_get_option( 'li_cw_gallery_subtitle', __( '用镜头记录下的瞬间。', 'li-cw' ) ) ); ?>
             </p>
             <?php
             // 照片总数 badge — 统计实际展示的图片张数（含缓存）

@@ -58,9 +58,16 @@ function li_cw_enqueue_code_highlight() {
             }).join("");
         }
 
-        // 一键复制按钮
+        // 一键复制按钮 — 包装在 wrapper 中，使按钮不随 pre 滚动
         function addCopyButton(block) {
             const pre = block.parentElement;
+
+            // 创建 wrapper，按钮定位在 wrapper 层，不受 pre 滚动影响
+            const wrapper = document.createElement("div");
+            wrapper.className = "code-block-wrapper";
+            pre.parentNode.insertBefore(wrapper, pre);
+            wrapper.appendChild(pre);
+
             const btn = document.createElement("button");
             btn.className = "code-copy-btn";
             btn.textContent = "复制";
@@ -76,7 +83,7 @@ function li_cw_enqueue_code_highlight() {
                 }
             });
 
-            pre.appendChild(btn);
+            wrapper.appendChild(btn);
         }
     ');
 }

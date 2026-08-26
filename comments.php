@@ -107,6 +107,15 @@ if ( post_password_required() ) return;
 function li_cw_simple_comment( $comment, $args, $depth ) {
     $is_reply = ( $depth > 1 );
     $is_pinned = ! $is_reply && get_comment_meta( $comment->comment_ID, 'li_cw_pinned', true );
+
+    // 检测评论者是否为文章作者（支持登录用户 + 访客邮箱匹配）
+    $post_author_id    = get_post_field( 'post_author', $comment->comment_post_ID );
+    $post_author_email = get_the_author_meta( 'user_email', $post_author_id );
+    $is_post_author    = (
+        ( ! empty( $comment->user_id ) && (int) $comment->user_id === (int) $post_author_id ) ||
+        ( ! empty( $comment->comment_author_email ) && strtolower( $comment->comment_author_email ) === strtolower( $post_author_email ) )
+    );
+
     $parent_author = '';
     if ( $is_reply ) {
         $parent_comment = get_comment( $comment->comment_parent );
@@ -120,6 +129,9 @@ function li_cw_simple_comment( $comment, $args, $depth ) {
             <div class="comment-author">
                 <?php echo get_avatar( $comment, 32 ); ?>
                 <span class="fn"><?php echo get_comment_author(); ?></span>
+                <?php if ( $is_post_author ) : ?>
+                    <span class="comment-author-badge"><?php esc_html_e( '博主', 'li-cw' ); ?></span>
+                <?php endif; ?>
                 <?php if ( $is_pinned ) : ?>
                     <span class="comment-pinned-badge"><?php esc_html_e( '置顶', 'li-cw' ); ?></span>
                 <?php endif; ?>

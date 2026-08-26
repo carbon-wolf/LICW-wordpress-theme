@@ -6,7 +6,7 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 $post_id = get_the_ID();
-$tag = li_cw_get_blog_tag( $post_id );
+$tags = get_the_tags( $post_id );
 ?>
 <article class="blog-card reveal">
     <div class="blog-card-date">
@@ -15,8 +15,12 @@ $tag = li_cw_get_blog_tag( $post_id );
     </div>
 
     <div class="blog-card-content">
-        <?php if ( $tag ) : ?>
-            <span class="blog-card-tag"><?php echo esc_html( $tag ); ?></span>
+        <?php if ( $tags && ! is_wp_error( $tags ) ) : ?>
+            <div class="blog-card-tags">
+                <?php foreach ( $tags as $t ) : ?>
+                    <a href="<?php echo esc_url( get_tag_link( $t ) ); ?>" class="blog-card-tag">#<?php echo esc_html( $t->name ); ?></a>
+                <?php endforeach; ?>
+            </div>
         <?php endif; ?>
         <h3>
             <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>

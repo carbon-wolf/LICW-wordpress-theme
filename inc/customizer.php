@@ -380,6 +380,16 @@ function li_cw_register_customizer( $wp_customize ) {
         'type'    => 'checkbox',
     ));
 
+    $wp_customize->add_setting( 'li_cw_links_subtitle', array(
+        'default'           => '友人、工具、常去的地方。',
+        'sanitize_callback' => 'sanitize_text_field',
+    ));
+    $wp_customize->add_control( 'li_cw_links_subtitle', array(
+        'section' => 'li_cw_section_links',
+        'label'   => esc_html__( '页面副标题', 'li-cw' ),
+        'type'    => 'text',
+    ));
+
 
     // ========== 5.5. 说说设置 ==========
     $wp_customize->add_section( 'li_cw_section_shuoshuo', array(
@@ -462,6 +472,44 @@ function li_cw_register_customizer( $wp_customize ) {
         'label'   => esc_html__( '点缀字体栈', 'li-cw' ),
         'type'    => 'text',
         'description' => '用于欢迎语、引用块等少量点缀',
+    ));
+
+
+    // ========== 5. 照片墙设置 ==========
+    $wp_customize->add_section( 'li_cw_section_gallery', array(
+        'title'       => esc_html__( '照片墙设置', 'li-cw' ),
+        'priority'    => 60,
+    ));
+
+    $wp_customize->add_setting( 'li_cw_gallery_title', array(
+        'default'           => '照片墙',
+        'sanitize_callback' => 'sanitize_text_field',
+    ));
+    $wp_customize->add_control( 'li_cw_gallery_title', array(
+        'section' => 'li_cw_section_gallery',
+        'label'   => esc_html__( '页面标题', 'li-cw' ),
+        'type'    => 'text',
+    ));
+
+    $wp_customize->add_setting( 'li_cw_gallery_subtitle', array(
+        'default'           => '用镜头记录下的瞬间。',
+        'sanitize_callback' => 'sanitize_text_field',
+    ));
+    $wp_customize->add_control( 'li_cw_gallery_subtitle', array(
+        'section' => 'li_cw_section_gallery',
+        'label'   => esc_html__( '页面副标题', 'li-cw' ),
+        'type'    => 'text',
+    ));
+
+    $wp_customize->add_setting( 'li_cw_photos_per_page', array(
+        'default'           => 24,
+        'sanitize_callback' => 'absint',
+    ));
+    $wp_customize->add_control( 'li_cw_photos_per_page', array(
+        'section'     => 'li_cw_section_gallery',
+        'label'       => esc_html__( '每页显示照片数', 'li-cw' ),
+        'type'        => 'number',
+        'input_attrs' => array( 'min' => 4, 'max' => 100 ),
     ));
 
 }

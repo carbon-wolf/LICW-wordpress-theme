@@ -102,45 +102,41 @@ function li_cw_get_toc() {
     $html .= '<summary class="toc-title">' . esc_html__( '目录', 'li-cw' ) . '</summary>';
     $html .= '<ol class="toc-list">';
 
-    $stack   = array(); // 层级栈
-    $first   = true;
-    $min_lvl = 2;
+    $prev_level = 0;
+    $min_lvl   = 2;
 
     foreach ( $items as $item ) {
         $lvl = $item['level'];
 
-        // 关闭前一项
-        if ( ! $first ) {
-            $html .= '</li>';
-        }
-        $first = false;
-
-        // 进入子层级
-        while ( ! empty( $stack ) && end( $stack ) >= $lvl ) {
-            $html .= '</ol></li>';
-            array_pop( $stack );
-        }
-
-        // 开启新层级
-        if ( ! empty( $stack ) && end( $stack ) < $lvl ) {
+        if ( $prev_level === 0 ) {
+            // 首项：直接开启 <li>，不闭合前项
+        } elseif ( $lvl > $prev_level ) {
+            // 进入子层级：在前项 <li> 内开启嵌套 <ol>（不闭合前项 <li>）
             $html .= '<ol>';
-            $stack[] = $lvl;
-        }
-
-        // 首个/顶层项不嵌套子 <ol>
-        if ( empty( $stack ) ) {
-            $stack[] = $lvl;
+        } elseif ( $lvl < $prev_level ) {
+            // 回到上层：先闭合前项 <li>，再按层级差逐层 </ol></li>
+            $html .= '</li>';
+            $diff = $prev_level - $lvl;
+            for ( $i = 0; $i < $diff; $i++ ) {
+                $html .= '</ol></li>';
+            }
+        } else {
+            // 同级：仅闭合前项 <li>
+            $html .= '</li>';
         }
 
         $html .= '<li class="toc-item toc-level-' . $lvl . '">';
         $html .= '<a href="#' . esc_attr( $item['id'] ) . '">' . esc_html( $item['text'] ) . '</a>';
+        $prev_level = $lvl;
     }
 
-    // 关闭剩余层级
-    while ( ! empty( $stack ) ) {
-        $html .= '</li></ol>';
-        array_pop( $stack );
+    // 关闭最后一项 + 回退到顶层
+    $html .= '</li>';
+    $diff = $prev_level - $min_lvl;
+    for ( $i = 0; $i < $diff; $i++ ) {
+        $html .= '</ol></li>';
     }
+    $html .= '</ol>';
 
     $html .= '</details>';
     $html .= '</nav>';

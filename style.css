@@ -852,18 +852,23 @@ button {
   opacity: 1;
 }
 
+.blog-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
 .blog-card-tag {
   font-family: var(--font-ui);
-  display: inline-block;
   font-size: var(--text-caption);
-  padding: 2px 8px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 2px;
-  color: var(--text-secondary);
-  margin-bottom: 8px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  color: var(--accent-gold);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.blog-card-tag:hover {
+  color: var(--accent-gold-hover);
 }
 
 .blog-card-excerpt {
@@ -1141,10 +1146,12 @@ button {
 
 .toc-list {
   counter-reset: toc-counter;
+  list-style: none;
 }
 
 .toc-list ol {
   padding-left: var(--space-lg);
+  list-style: none;
 }
 
 .toc-item {
@@ -1294,6 +1301,12 @@ button {
   position: relative;
 }
 
+/* 引用块内末段不叠加外边距，避免底部留白过大（padding 阻止 margin 折叠） */
+.single-content blockquote > p:last-child,
+.about-content blockquote > p:last-child {
+  margin-bottom: 0;
+}
+
 /* 左上角金色菱形标 — 仿佛装订线上的装饰铆钉 */
 .single-content blockquote::before,
 .about-content blockquote::before {
@@ -1323,7 +1336,8 @@ button {
 }
 /* 正文超链接 — 金色虚线下划线标识，hover 变实线 + 文字着色 */
 .single-content a,
-.about-content a {
+.about-content a,
+.comment-content a {
     color: var(--text-primary);
     text-decoration: underline;
     text-decoration-style: dashed;
@@ -1333,7 +1347,8 @@ button {
     transition: all 0.2s ease;
 }
 .single-content a:hover,
-.about-content a:hover {
+.about-content a:hover,
+.comment-content a:hover {
     color: var(--accent-gold);
     text-decoration-style: solid;
     text-decoration-color: var(--accent-gold);
@@ -1674,10 +1689,99 @@ pre::-webkit-scrollbar-thumb:hover {
   margin: 1.5em 0;
 }
 
-.about-content hr {
-  border: none;
-  border-top: 1px solid var(--border-color);
-  margin: 2em 0;
+/* ============================================
+   分隔线 — 手工装帧感
+   克制不争。分隔是它的职责，不是舞台。
+   三种变体：金痕（默认）· 三点金珠 · 菱心
+   ============================================ */
+
+/* 金痕 — 单道金线居中短展，两端渐隐如宣纸落墨笔锋收束 */
+hr,
+.wp-block-separator {
+  border: 0;
+  height: 1px;
+  margin: var(--space-xl) auto;
+  width: 40%;
+  max-width: 260px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--accent-gold) 15%,
+    var(--accent-gold) 85%,
+    transparent
+  );
+  opacity: 0.45;
+}
+
+/* 宽款 — 适合长文段落间的深呼吸 */
+hr.sep-wide,
+.wp-block-separator.is-style-wide {
+  width: 70%;
+  max-width: 520px;
+}
+
+/* 点款 — 三点金珠，中距疏朗如省略号的仪式感 */
+hr.sep-dots,
+.wp-block-separator.is-style-dots {
+  height: auto;
+  width: auto;
+  max-width: none;
+  background: none;
+  opacity: 1;
+  text-align: center;
+}
+hr.sep-dots::before,
+.wp-block-separator.is-style-dots::before {
+  content: "·  ·  ·";
+  display: inline;
+  font-size: 1.1rem;
+  letter-spacing: 0.55em;
+  color: var(--accent-gold);
+  font-family: var(--font-heading);
+  opacity: 0.55;
+}
+hr.sep-dots::after,
+.wp-block-separator.is-style-dots::after {
+  content: none;
+}
+
+/* 菱心 — 金线中点嵌◆，呼应引用块四角装帧铆钉，克制中的一点巧思 */
+hr.sep-ornament {
+  height: auto;
+  width: 60%;
+  max-width: 380px;
+  background: none;
+  opacity: 1;
+  text-align: center;
+  line-height: 1;
+  position: relative;
+}
+hr.sep-ornament::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--accent-gold) 24%,
+    var(--accent-gold) 76%,
+    transparent
+  );
+  opacity: 0.35;
+}
+hr.sep-ornament::after {
+  content: "◆";
+  position: relative;
+  display: inline-block;
+  font-size: 0.5rem;
+  color: var(--accent-gold);
+  opacity: 0.55;
+  background: var(--bg-page);
+  padding: 0 1.2em;
+  line-height: 1;
 }
 
 .about-content code {
@@ -1691,16 +1795,46 @@ pre::-webkit-scrollbar-thumb:hover {
 /* ============================================
    10. 友链
    ============================================ */
-.links-wrap {
-  max-width: 900px;
-  margin: var(--space-2xl) auto;
+/* 友链页正文（页面编辑器长文），与文章正文同宽 */
+.links-intro {
+  max-width: 70ch;
+  margin: 0 auto var(--space-lg);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
 }
 
 .links-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: var(--space-lg);
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+/* 友链分类标题 */
+.links-category-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-subhead);
+  font-weight: 600;
+  margin-top: var(--space-2xl);
+  margin-bottom: 0;
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+/* 首个分类标题不堆叠顶部留白，与 page header 保持原有间距 */
+.links-category-title:first-child {
   margin-top: var(--space-xl);
+}
+
+/* 友链分类描述 */
+.links-category-desc {
+  font-size: var(--text-meta);
+  color: var(--text-secondary);
+  margin-top: var(--space-xs);
+  margin-bottom: var(--space-sm);
 }
 
 .link-card {
@@ -2004,6 +2138,24 @@ pre::-webkit-scrollbar-thumb:hover {
   color: var(--accent-gold);
   background: oklch(68% 0.09 82 / 0.12);
   border: 1px solid oklch(68% 0.09 82 / 0.3);
+  border-radius: 3px;
+  padding: 1px 6px;
+  margin-left: 6px;
+  vertical-align: middle;
+  line-height: 1.5;
+}
+
+/* 博主身份徽章 — 与置顶徽章 pill 结构一致，使用主色调区分 */
+.comment-author-badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  background: oklch(30% 0.055 170 / 0.10);
+  border: 1px solid oklch(30% 0.055 170 / 0.30);
   border-radius: 3px;
   padding: 1px 6px;
   margin-left: 6px;
@@ -2863,6 +3015,15 @@ pre::-webkit-scrollbar-thumb:hover {
 }
 
 /* ===== 代码块增强：行号 + 复制按钮 ===== */
+/* 外层包装：作为复制按钮的定位上下文，按钮不随 pre 滚动 */
+.code-block-wrapper {
+    position: relative;
+    margin: 1.5em 0;
+}
+.code-block-wrapper pre {
+    margin: 0;
+}
+
 pre {
     position: relative;
     padding-left: 3.5em; /* 给行号留位置 */
@@ -2892,12 +3053,6 @@ pre {
     line-height: 1.65;
 }
 
-/* 代码块内边距统一 */
-pre {
-    position: relative;
-    padding-left: 3.5em;
-}
-
 /* 兼容古腾堡代码块默认样式 */
 .wp-block-code {
     border: none;
@@ -2908,11 +3063,12 @@ pre {
     padding: 16px 20px 16px 3.5em;
     background: var(--bg-card);
 }
-/* 复制按钮 */
+
+/* 复制按钮 — 定位在 wrapper 上，不随 pre 内部滚动而移动 */
 .code-copy-btn {
     position: absolute;
-    top: 10px;
-    right: 12px;
+    top: 8px;
+    right: 8px;
     padding: 4px 10px;
     font-size: var(--text-caption);
     font-family: var(--font-ui);
@@ -2921,15 +3077,35 @@ pre {
     border-radius: 3px;
     color: var(--text-secondary);
     cursor: pointer;
-    opacity: 0;
+    opacity: 1;
+    z-index: 5;
     transition: all 0.2s;
 }
-pre:hover .code-copy-btn {
-    opacity: 1;
+
+/* 仅桌面端（有 hover 能力）隐藏按钮，hover wrapper 时显示 */
+@media (hover: hover) {
+    .code-copy-btn {
+        opacity: 0;
+    }
+    .code-block-wrapper:hover .code-copy-btn,
+    .code-copy-btn:focus-visible {
+        opacity: 1;
+    }
 }
+
 .code-copy-btn:hover {
     color: var(--accent-gold);
     border-color: var(--accent-gold);
+}
+
+/* 移动端：稍大触控区域 */
+@media (max-width: 600px) {
+    .code-copy-btn {
+        top: 6px;
+        right: 6px;
+        padding: 6px 12px;
+        font-size: 0.75rem;
+    }
 }
 
 /* 高亮配色：适配明暗双模式 */
@@ -3311,14 +3487,30 @@ html.dark .hljs-function { color: #61afef; }
   overflow: hidden;
 }
 
-/* --- 暗色模式微调 --- */
+/* --- 暗色模式微调 — 加深遮罩，提升文字可读性 --- */
 html.dark .photo-overlay {
   background: linear-gradient(
     to top,
-    oklch(0% 0 0 / 0.72) 0%,
-    oklch(0% 0 0 / 0.3) 55%,
+    oklch(0% 0 0 / 0.88) 0%,
+    oklch(0% 0 0 / 0.5) 45%,
+    oklch(0% 0 0 / 0.08) 80%,
     transparent 100%
   );
+}
+
+/* 暗色模式：标题更亮、阴影更锐，确保在任何背景图上都清晰 */
+html.dark .photo-overlay-title {
+  color: oklch(100% 0 0 / 1);
+  text-shadow: 0 1px 3px oklch(0% 0 0 / 0.7);
+  font-weight: 700;
+}
+
+html.dark .photo-overlay-meta .photo-date,
+html.dark .photo-overlay-meta .photo-location,
+html.dark .photo-overlay-meta .photo-camera,
+html.dark .photo-overlay-excerpt {
+  color: oklch(100% 0 0 / 0.92);
+  text-shadow: 0 1px 2px oklch(0% 0 0 / 0.6);
 }
 
 html.dark #masonry-grid .photo-card:hover .photo-thumb::after {
