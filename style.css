@@ -163,6 +163,27 @@ body {
   flex-direction: column;
 }
 
+/* ============================================
+   日夜切换同步渐变
+   让所有绘制主题色的表面（site-header 背景、
+   引用块双重线框、分隔线菱形垫圈等）随 body 底色
+   一起过渡，而非局部突变。
+   组件自身的 transition 声明优先级更高，不受影响；
+   弱动偏好由 prefers-reduced-motion 规则统一禁用。
+   ============================================ */
+*,
+*::before,
+*::after {
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    outline-color 0.3s ease,
+    box-shadow 0.3s ease,
+    color 0.3s ease,
+    fill 0.3s ease,
+    stroke 0.3s ease;
+}
+
 .site-main {
   flex: 1;
 }
@@ -1145,7 +1166,6 @@ button {
 }
 
 .toc-list {
-  counter-reset: toc-counter;
   list-style: none;
 }
 
@@ -1155,16 +1175,8 @@ button {
 }
 
 .toc-item {
-  counter-increment: toc-counter;
   padding: 4px 0;
   line-height: 1.5;
-}
-
-.toc-item::before {
-  content: counter(toc-counter) ".";
-  color: var(--text-secondary);
-  margin-right: 6px;
-  font-size: var(--text-caption);
 }
 
 .toc-item a {
@@ -1691,72 +1703,28 @@ pre::-webkit-scrollbar-thumb:hover {
 
 /* ============================================
    分隔线 — 手工装帧感
-   克制不争。分隔是它的职责，不是舞台。
-   三种变体：金痕（默认）· 三点金珠 · 菱心
+   分隔是它的职责，但也可以是一处落款。
+   默认「菱心」：单道金线两端渐隐，中点一枚金菱，
+   呼应引用块四角装帧铆钉。变体：宽金痕 · 三点金珠。
+   （旧 sep-ornament 类保留兼容，渲染同默认款）
    ============================================ */
 
-/* 金痕 — 单道金线居中短展，两端渐隐如宣纸落墨笔锋收束 */
+/* 菱心（默认）— 金线如笔锋收束，中点嵌旋转 45° 金菱 */
 hr,
+hr.sep-ornament,
 .wp-block-separator {
   border: 0;
-  height: 1px;
-  margin: var(--space-xl) auto;
-  width: 40%;
-  max-width: 260px;
-  background: linear-gradient(
-    to right,
-    transparent,
-    var(--accent-gold) 15%,
-    var(--accent-gold) 85%,
-    transparent
-  );
-  opacity: 0.45;
-}
-
-/* 宽款 — 适合长文段落间的深呼吸 */
-hr.sep-wide,
-.wp-block-separator.is-style-wide {
-  width: 70%;
-  max-width: 520px;
-}
-
-/* 点款 — 三点金珠，中距疏朗如省略号的仪式感 */
-hr.sep-dots,
-.wp-block-separator.is-style-dots {
   height: auto;
-  width: auto;
-  max-width: none;
-  background: none;
-  opacity: 1;
-  text-align: center;
-}
-hr.sep-dots::before,
-.wp-block-separator.is-style-dots::before {
-  content: "·  ·  ·";
-  display: inline;
-  font-size: 1.1rem;
-  letter-spacing: 0.55em;
-  color: var(--accent-gold);
-  font-family: var(--font-heading);
-  opacity: 0.55;
-}
-hr.sep-dots::after,
-.wp-block-separator.is-style-dots::after {
-  content: none;
-}
-
-/* 菱心 — 金线中点嵌◆，呼应引用块四角装帧铆钉，克制中的一点巧思 */
-hr.sep-ornament {
-  height: auto;
+  margin: var(--space-2xl) auto;
   width: 60%;
-  max-width: 380px;
+  max-width: 420px;
   background: none;
-  opacity: 1;
   text-align: center;
-  line-height: 1;
   position: relative;
 }
-hr.sep-ornament::before {
+hr::before,
+hr.sep-ornament::before,
+.wp-block-separator::before {
   content: "";
   position: absolute;
   left: 0;
@@ -1766,22 +1734,111 @@ hr.sep-ornament::before {
   background: linear-gradient(
     to right,
     transparent,
-    var(--accent-gold) 24%,
-    var(--accent-gold) 76%,
+    var(--accent-gold) 18%,
+    var(--accent-gold) 82%,
     transparent
   );
-  opacity: 0.35;
-}
-hr.sep-ornament::after {
-  content: "◆";
-  position: relative;
-  display: inline-block;
-  font-size: 0.5rem;
-  color: var(--accent-gold);
   opacity: 0.55;
-  background: var(--bg-page);
-  padding: 0 1.2em;
+}
+hr::after,
+hr.sep-ornament::after,
+.wp-block-separator::after {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  transform: rotate(45deg);
+  background: var(--accent-gold);
+  opacity: 0.85;
+  /* 用页面底色垫圈隔开金线，让菱形像嵌在缝里 */
+  box-shadow: 0 0 0 6px var(--bg-page);
   line-height: 1;
+}
+
+/* 宽款 — 不嵌菱的通长金痕，适合长文段落间的深呼吸 */
+hr.sep-wide,
+.wp-block-separator.is-style-wide {
+  width: 70%;
+  max-width: 520px;
+}
+hr.sep-wide::after,
+.wp-block-separator.is-style-wide::after {
+  content: none;
+}
+
+/* 点款 — 三点金珠，中距疏朗如省略号的仪式感 */
+hr.sep-dots,
+.wp-block-separator.is-style-dots {
+  height: auto;
+  width: auto;
+  max-width: none;
+  background: none;
+  text-align: center;
+}
+hr.sep-dots::before,
+.wp-block-separator.is-style-dots::before {
+  content: "·  ·  ·";
+  position: static;
+  height: auto;
+  background: none;
+  display: inline;
+  font-size: 1.1rem;
+  letter-spacing: 0.55em;
+  color: var(--accent-gold);
+  font-family: var(--font-heading);
+  opacity: 0.65;
+}
+hr.sep-dots::after,
+.wp-block-separator.is-style-dots::after {
+  content: none;
+}
+
+/* ============================================
+   文章内分页 (<!--nextpage-->)
+   与全站分页同语言：圆角页码，当前页实心主色
+   ============================================ */
+.post-pages {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin: var(--space-2xl) 0 var(--space-lg);
+}
+
+.post-pages-label {
+  font-family: var(--font-ui);
+  font-size: var(--text-meta);
+  color: var(--text-secondary);
+  letter-spacing: 0.06em;
+}
+
+.post-page-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  font-family: var(--font-ui);
+  font-size: var(--text-meta);
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.post-pages a.post-page-num:hover {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+/* 当前页 — 实心主色高亮，不可点击（aria-current="page"） */
+.post-page-num.is-current {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-on-accent);
 }
 
 .about-content code {
@@ -2395,15 +2452,24 @@ hr.sep-ornament::after {
   color: var(--text-secondary);
 }
 
-.comment-form-cookies label {
+/* 提高优先级：覆盖下方 .comment-modal-body label 的块级样式，
+   让勾选框与说明文字同行显示 */
+.comment-modal-body .comment-form-cookies label {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   cursor: pointer;
+  margin-bottom: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-caption);
+  line-height: 1.6;
 }
 
 .comment-form-cookies input[type="checkbox"] {
   margin: 0;
+  width: auto; /* 覆盖 .comment-modal-body input 的 width:100%，避免复选框被拉满整行 */
+  flex-shrink: 0;
+  accent-color: var(--accent-gold);
 }
 
 .comment-modal-body label {
