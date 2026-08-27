@@ -130,10 +130,6 @@ html.dark {
   --color-info-bg: oklch(25% 0.02 200);
 
   --shadow-sm: 0 2px 8px oklch(0% 0 0 / 0.18);
-
-  /* 暗色模式：浅色文字在深色背景上需要额外 0.05 行高补偿 */
-  --leading-body: 1.75;
-  --leading-relaxed: 1.85;
 }
 
 /* ============================================
@@ -157,7 +153,7 @@ body {
   font-size: var(--text-body);
   font-kerning: normal;
   font-variant-ligatures: common-ligatures;
-  transition: background 0.3s ease, color 0.3s ease;
+  transition: background 0.2s ease, color 0.2s ease;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -175,13 +171,68 @@ body {
 *::before,
 *::after {
   transition:
-    background-color 0.3s ease,
-    border-color 0.3s ease,
-    outline-color 0.3s ease,
-    box-shadow 0.3s ease,
-    color 0.3s ease,
-    fill 0.3s ease,
-    stroke 0.3s ease;
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    outline-color 0.2s ease,
+    box-shadow 0.2s ease,
+    color 0.2s ease,
+    fill 0.2s ease,
+    stroke 0.2s ease;
+}
+
+/* 移动端切换更干脆：短促渐变即可，
+   避免长过渡在低端设备上显得拖沓、掉帧 */
+@media (max-width: 600px) {
+  body,
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.12s;
+  }
+}
+
+/* ============================================
+   日夜切换统一过渡（is-theming 窗口）
+   main.js 在点击切换按钮瞬间给 <html> 挂上
+   .is-theming，约 0.3s 后移除。
+   用 !important 覆盖各组件自身的 transition，
+   保证全站表面与文字同节奏切换，不局部突变。
+   文字（color/fill/stroke）时长刻意比表面更短：
+   文字先落定、表面随后收尾——文字永远是先跳完的
+   那一个，绝不会拖在最后。
+   不在窗口内过渡 opacity/transform，避免低端
+   移动端全站动画过载导致掉帧、文字滞后。
+   ============================================ */
+html.is-theming *,
+html.is-theming *::before,
+html.is-theming *::after {
+  transition:
+    background-color 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease,
+    outline-color 0.18s ease,
+    box-shadow 0.18s ease,
+    color 0.1s ease,
+    fill 0.1s ease,
+    stroke 0.1s ease !important;
+}
+
+/* 移动端主题切换节奏更干脆（覆盖上方桌面时长，
+   文字仍保持比表面更快落定） */
+@media (max-width: 600px) {
+  html.is-theming *,
+  html.is-theming *::before,
+  html.is-theming *::after {
+    transition:
+      background-color 0.12s ease,
+      background 0.12s ease,
+      border-color 0.12s ease,
+      outline-color 0.12s ease,
+      box-shadow 0.12s ease,
+      color 0.08s ease,
+      fill 0.08s ease,
+      stroke 0.08s ease !important;
+  }
 }
 
 .site-main {
@@ -279,6 +330,13 @@ button {
   .reveal {
     opacity: 1;
     transform: none;
+  }
+
+  /* 弱动偏好下，主题切换亦不做过渡 */
+  html.is-theming *,
+  html.is-theming *::before,
+  html.is-theming *::after {
+    transition: none !important;
   }
 }
 
@@ -961,10 +1019,29 @@ button {
   text-transform: uppercase;
 }
 
-/* 已完成状态 — 语义色 */
-.project-status.is-done {
+/* 绿色徽章 — 语义成功色 */
+.project-status.is-green {
   background: var(--color-success-bg);
   color: var(--color-success);
+}
+
+/* 红色徽章 — 语义错误色 */
+.project-status.is-red {
+  background: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+/* 灰色徽章 — 中性 */
+.project-status.is-gray {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+/* 暗色模式徽章 — 深色底上的金黄色（其余配色用语义变量自动适配） */
+html.dark .project-status.is-gold {
+  background: oklch(30% 0.045 82);
+  color: var(--accent-gold-hover);
 }
 
 .project-title {

@@ -7,6 +7,10 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 $post_id = get_the_ID();
 $status = li_cw_get_project_status( $post_id );
+$status_color = get_post_meta( $post_id, 'li_cw_project_status_color', true );
+if ( ! in_array( $status_color, array( 'gold', 'green', 'red', 'gray' ), true ) ) {
+    $status_color = 'gold';
+}
 $cat = get_post_meta( $post_id, 'li_cw_project_cat', true );
 $external_link = get_post_meta( $post_id, 'li_cw_project_link', true );
 $link = $external_link ? $external_link : get_the_permalink();
@@ -21,7 +25,7 @@ $link = $external_link ? $external_link : get_the_permalink();
             <?php endif; ?>
         </div>
         <div class="project-info">
-            <span class="project-status"><?php echo esc_html( $status ); ?></span>
+            <span class="project-status is-<?php echo esc_attr( $status_color ); ?>"><?php echo esc_html( $status ); ?></span>
             <h3 class="project-title"><?php the_title(); ?></h3>
             <?php if ( $cat ) : ?>
                 <p class="project-cat"><?php echo esc_html( $cat ); ?></p>

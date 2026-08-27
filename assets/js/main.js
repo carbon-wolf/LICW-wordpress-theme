@@ -4,6 +4,22 @@
  */
 document.addEventListener('DOMContentLoaded', function() {
 
+    // ========== 日夜切换平滑过渡 ==========
+    // 在 darkmode.js 切换 class 之前（捕获阶段，先于其冒泡阶段处理）
+    // 给 <html> 挂上 .is-theming，配合 style.css 的统一过渡规则，
+    // 让全站表面与文字同节奏平滑换色；约 0.3s 后移除以免影响日常动效。
+    const rootEl = document.documentElement;
+    const themeToggle = document.querySelector('.dark-toggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', function() {
+            rootEl.classList.add('is-theming');
+            clearTimeout(window.__liCwThemeTimer);
+            window.__liCwThemeTimer = setTimeout(function() {
+                rootEl.classList.remove('is-theming');
+            }, 320);
+        }, true);
+    }
+
     // ========== 移动端汉堡菜单 ==========
     const navToggle = document.querySelector('.nav-toggle');
     const mainNav = document.querySelector('.main-nav');
