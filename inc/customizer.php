@@ -390,6 +390,68 @@ function li_cw_register_customizer( $wp_customize ) {
         'type'    => 'text',
     ));
 
+    // ===== 文章抓取（RSS）=====
+    // 每个友链抓取的文章数
+    $wp_customize->add_setting( 'li_cw_links_feed_count', array(
+        'default'           => 3,
+        'sanitize_callback' => 'absint',
+    ));
+    $wp_customize->add_control( 'li_cw_links_feed_count', array(
+        'section'     => 'li_cw_section_links',
+        'label'       => esc_html__( '每个友链抓取文章数', 'li-cw' ),
+        'type'        => 'number',
+        'input_attrs' => array( 'min' => 1, 'max' => 10 ),
+        'description' => esc_html__( '仅对下方勾选“开启抓取”的分类生效', 'li-cw' ),
+    ));
+
+    // 缓存时长
+    $wp_customize->add_setting( 'li_cw_links_feed_cache', array(
+        'default'           => 60,
+        'sanitize_callback' => 'absint',
+    ));
+    $wp_customize->add_control( 'li_cw_links_feed_cache', array(
+        'section'     => 'li_cw_section_links',
+        'label'       => esc_html__( '文章缓存时长（分钟）', 'li-cw' ),
+        'type'        => 'number',
+        'input_attrs' => array( 'min' => 5, 'max' => 1440 ),
+        'description' => esc_html__( '后台每小时自动刷新一次', 'li-cw' ),
+    ));
+
+    // 是否显示日期
+    $wp_customize->add_setting( 'li_cw_links_feed_date', array(
+        'default'           => true,
+        'sanitize_callback' => 'wp_validate_boolean',
+    ));
+    $wp_customize->add_control( 'li_cw_links_feed_date', array(
+        'section' => 'li_cw_section_links',
+        'label'   => esc_html__( '显示文章日期', 'li-cw' ),
+        'type'    => 'checkbox',
+    ));
+
+    // 按分类开启抓取（动态生成复选框，无需额外 JS）
+    $li_cw_link_cats = get_terms( array(
+        'taxonomy'   => 'link_category',
+        'hide_empty' => false,
+    ) );
+    if ( ! is_wp_error( $li_cw_link_cats ) && ! empty( $li_cw_link_cats ) ) {
+        foreach ( $li_cw_link_cats as $li_cw_cat ) {
+            $li_cw_cat_setting = 'li_cw_links_feed_cat_' . $li_cw_cat->term_id;
+            $wp_customize->add_setting( $li_cw_cat_setting, array(
+                'default'           => false,
+                'sanitize_callback' => 'wp_validate_boolean',
+            ));
+            $wp_customize->add_control( $li_cw_cat_setting, array(
+                'section' => 'li_cw_section_links',
+                'label'   => sprintf(
+                    /* translators: %s: 友链分类名称 */
+                    esc_html__( '开启抓取：%s', 'li-cw' ),
+                    $li_cw_cat->name
+                ),
+                'type'    => 'checkbox',
+            ));
+        }
+    }
+
 
     // ========== 5.5. 说说设置 ==========
     $wp_customize->add_section( 'li_cw_section_shuoshuo', array(

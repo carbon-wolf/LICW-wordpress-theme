@@ -23,6 +23,8 @@ get_header();
         <?php endif; ?>
 
         <?php
+        $feed_count = max( 1, min( 10, absint( li_cw_get_option( 'li_cw_links_feed_count', 3 ) ) ) );
+
         // 获取所有链接分类（WordPress 原生 link_category）
         $link_cats = get_terms( array(
             'taxonomy'   => 'link_category',
@@ -40,37 +42,70 @@ get_header();
                     'show_description' => 1,
                 ) );
                 if ( ! $bookmarks ) continue;
+                $feed_enabled = li_cw_link_category_has_feed( $cat->term_id );
         ?>
             <h2 class="links-category-title"><?php echo esc_html( $cat->name ); ?></h2>
                 <?php if ( ! empty( $cat->description ) ) : ?>
                     <p class="links-category-desc"><?php echo esc_html( $cat->description ); ?></p>
                 <?php endif; ?>
+        <?php
+                if ( $feed_enabled ) :
+                    // 开启抓取：有内容或待抓取 → 气泡；已确认抓取失败 → 卡片，排在气泡之后
+                    $bubbles        = array();
+                    $fallback_cards = array();
+                    foreach ( $bookmarks as $link ) {
+                        $items = li_cw_get_link_feed_items_cached( $link, $feed_count );
+                        if ( is_array( $items ) && ! $items ) {
+                            $fallback_cards[] = $link;
+                        } else {
+                            $bubbles[] = $link;
+                        }
+                    }
+
+                    if ( $bubbles ) :
+            ?>
+            <div class="links-dialogue">
+            <?php
+                    foreach ( $bubbles as $link ) {
+                        get_template_part( 'template-parts/link-bubble', null, array(
+                            'link'       => $link,
+                            'feed_count' => $feed_count,
+                        ) );
+                    }
+            ?>
+            </div>
+            <?php
+                    endif;
+
+                    if ( $fallback_cards ) :
+            ?>
+            <div class="links-grid links-fallback">
+            <?php
+                    foreach ( $fallback_cards as $link ) {
+                        get_template_part( 'template-parts/link-card', null, array(
+                            'link' => $link,
+                        ) );
+                    }
+            ?>
+            </div>
+            <?php
+                    endif;
+                else :
+            ?>
             <div class="links-grid">
-            <?php foreach ( $bookmarks as $link ) : ?>
-                <a href="<?php echo esc_url( $link->link_url ); ?>"
-                   class="link-card"
-                   target="_blank"
-                   rel="noopener noreferrer">
-                    <?php if ( $link->link_image ) : ?>
-                        <img src="<?php echo esc_url( $link->link_image ); ?>" alt="<?php echo esc_attr( $link->link_name ); ?>" class="link-avatar">
-                    <?php else : ?>
-                        <div class="link-avatar" style="background: var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); font-family: var(--font-heading); font-weight: 600;">
-                            <?php echo mb_substr( $link->link_name, 0, 1 ); ?>
-                        </div>
-                    <?php endif; ?>
-                    <div class="link-info">
-                        <div class="link-name"><?php echo esc_html( $link->link_name ); ?></div>
-                        <?php if ( $link->link_description ) : ?>
-                            <div class="link-desc"><?php echo esc_html( $link->link_description ); ?></div>
-                        <?php endif; ?>
-                    </div>
-                </a>
-            <?php endforeach; ?>
+            <?php
+                    foreach ( $bookmarks as $link ) {
+                        get_template_part( 'template-parts/link-card', null, array(
+                            'link' => $link,
+                        ) );
+                    }
+            ?>
             </div>
         <?php
+                endif;
             endforeach;
         else :
-            // 回退：无分类时显示全部链接
+            // 回退：无分类时显示全部链接（默认卡片）
             $bookmarks = get_bookmarks( array(
                 'orderby'        => 'name',
                 'order'          => 'ASC',
@@ -80,29 +115,12 @@ get_header();
             <div class="links-grid">
             <?php if ( $bookmarks ) :
                 foreach ( $bookmarks as $link ) :
-            ?>
-                <a href="<?php echo esc_url( $link->link_url ); ?>"
-                   class="link-card"
-                   target="_blank"
-                   rel="noopener noreferrer">
-                    <?php if ( $link->link_image ) : ?>
-                        <img src="<?php echo esc_url( $link->link_image ); ?>" alt="<?php echo esc_attr( $link->link_name ); ?>" class="link-avatar">
-                    <?php else : ?>
-                        <div class="link-avatar" style="background: var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); font-family: var(--font-heading); font-weight: 600;">
-                            <?php echo mb_substr( $link->link_name, 0, 1 ); ?>
-                        </div>
-                    <?php endif; ?>
-                    <div class="link-info">
-                        <div class="link-name"><?php echo esc_html( $link->link_name ); ?></div>
-                        <?php if ( $link->link_description ) : ?>
-                            <div class="link-desc"><?php echo esc_html( $link->link_description ); ?></div>
-                        <?php endif; ?>
-                    </div>
-                </a>
-            <?php
+                    get_template_part( 'template-parts/link-card', null, array(
+                        'link' => $link,
+                    ) );
                 endforeach;
             else :
-                echo '<p style="text-align:center; color:var(--text-secondary); grid-column:1/-1; padding:40px 0;">暂无友链</p>';
+                echo '<p class="links-empty">' . esc_html__( '暂无友链', 'li-cw' ) . '</p>';
             endif;
             ?>
             </div>

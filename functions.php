@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // 主题版本号，用于缓存刷新
-define( 'LI_CW_VERSION', '1.1.7' );
+define( 'LI_CW_VERSION', '1.1.9' );
 define( 'LI_CW_THEME_DIR', get_template_directory() );
 define( 'LI_CW_THEME_URI', get_template_directory_uri() );
 
@@ -30,6 +30,7 @@ require_once LI_CW_THEME_DIR . '/inc/cpt-photo.php';       // 照片 CPT
 require_once LI_CW_THEME_DIR . '/inc/lightbox.php';        // 图片灯箱
 require_once LI_CW_THEME_DIR . '/inc/toc.php';             // 文章目录
 require_once LI_CW_THEME_DIR . '/inc/og-meta.php';           // Open Graph / Twitter Card
+require_once LI_CW_THEME_DIR . '/inc/link-feed.php';        // 友链文章抓取（RSS）
 
 /**
  * 加载主题样式与脚本
@@ -58,6 +59,20 @@ function li_cw_enqueue_assets() {
             '4.2.2',
             true
         );
+    }
+
+    // 友链文章懒加载（仅友链页面加载）
+    if ( is_page_template( 'page-links.php' ) ) {
+        wp_enqueue_script(
+            'li-cw-link-feed',
+            LI_CW_THEME_URI . '/assets/js/link-feed.js',
+            array(),
+            LI_CW_VERSION,
+            true
+        );
+        wp_localize_script( 'li-cw-link-feed', 'liCwLinkFeed', array(
+            'restUrl' => esc_url_raw( rest_url( 'licw/v1/link-feed' ) ),
+        ) );
     }
 
     // 暗色模式脚本 - 头部提前加载，避免页面闪烁
