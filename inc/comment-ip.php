@@ -1,7 +1,8 @@
 <?php
 /**
  * 评论 IP 属地
- * 后台可选择性启用；发评论时查询一次并缓存，历史评论由定时任务补全。
+ * 后台可选择性启用（默认关闭）；发评论时异步查询一次并缓存，
+ * 历史评论由定时任务补全。失败写哨兵标记，避免队头饥饿。
  */
 if ( ! defined( 'ABSPATH' ) ) exit;
 
@@ -16,6 +17,8 @@ function li_cw_comment_ip_enabled() {
 
 /**
  * 查询单个 IP 的属地（带 transient 缓存）
+ * 默认第三方 API 仅在显式开启后调用；可用 li_cw_ip_location_api 过滤器
+ * 替换为自托管或其他服务（IP 仅发往所配置的接口）。
  *
  * @param string $ip IP 地址
  * @return string
@@ -66,6 +69,7 @@ function li_cw_fetch_ip_location( $ip ) {
 
 /**
  * 为某条评论查询并保存 IP 属地
+ * 解析失败写哨兵值 'unknown'，防止失败评论永久占据回填队头（饥饿）。
  *
  * @param int $comment_id 评论 ID
  */
@@ -79,13 +83,23 @@ function li_cw_store_comment_ip_location( $comment_id ) {
     }
 
     $loc = li_cw_fetch_ip_location( $comment->comment_author_IP );
-    if ( $loc ) {
-        update_comment_meta( $comment_id, 'li_cw_ip_location', $loc );
-    }
+    // 成功：属地；失败：哨兵 'unknown'（渲染层不显示哨兵）
+    update_comment_meta( $comment_id, 'li_cw_ip_location', $loc ? $loc : 'unknown' );
 }
 
 /**
- * 新评论发布后立即查询
+ * 渲染层辅助：读取属地（哨兵值视为无数据）
+ *
+ * @param int $comment_id 评论 ID
+ * @return string 空串表示无/未知
+ */
+function li_cw_get_comment_ip_location( $comment_id ) {
+    $loc = get_comment_meta( $comment_id, 'li_cw_ip_location', true );
+    return ( 'unknown' === $loc ) ? '' : (string) $loc;
+}
+
+/**
+ * 新评论发布后异步查询（不阻塞发评论请求）
  *
  * @param int $comment_id 评论 ID
  */
@@ -93,12 +107,14 @@ function li_cw_on_comment_post_ip( $comment_id ) {
     if ( ! li_cw_comment_ip_enabled() ) {
         return;
     }
-    li_cw_store_comment_ip_location( $comment_id );
+    wp_schedule_single_event( time() + 10, 'li_cw_lookup_comment_ip', array( (int) $comment_id ) );
 }
 add_action( 'comment_post', 'li_cw_on_comment_post_ip', 20 );
+add_action( 'li_cw_lookup_comment_ip', 'li_cw_store_comment_ip_location' );
 
 /**
  * 定时补全历史评论的 IP 属地（每次少量，避免打满接口）
+ * 哨兵值让 NOT EXISTS 查询自然跳过失败条目，先进先出。
  *
  * @param int $limit 单次处理条数
  */
@@ -111,7 +127,7 @@ function li_cw_backfill_comment_ip( $limit = 10 ) {
         'status'     => 'approve',
         'number'     => max( 1, (int) $limit ),
         'orderby'    => 'comment_date_gmt',
-        'order'      => 'DESC',
+        'order'      => 'ASC', // 先进先出，新评论由 comment_post 钩子实时处理
         'meta_query' => array(
             array(
                 'key'     => 'li_cw_ip_location',
@@ -129,6 +145,9 @@ function li_cw_backfill_comment_ip( $limit = 10 ) {
  * 注册补全任务
  */
 function li_cw_schedule_comment_ip_backfill() {
+    if ( ! li_cw_comment_ip_enabled() ) {
+        return;
+    }
     if ( ! wp_next_scheduled( 'li_cw_backfill_comment_ip' ) ) {
         wp_schedule_event( time() + 120, 'hourly', 'li_cw_backfill_comment_ip' );
     }
@@ -137,26 +156,22 @@ add_action( 'init', 'li_cw_schedule_comment_ip_backfill' );
 add_action( 'li_cw_backfill_comment_ip', 'li_cw_backfill_comment_ip' );
 
 /**
- * 后台访问时顺带补全（WP-Cron 不可靠时的兜底，5 分钟内最多一次）
+ * 开关变化时同步定时任务（含关闭时清理）
  */
-function li_cw_maybe_backfill_comment_ip_on_admin() {
-    if ( ! li_cw_comment_ip_enabled() || ! current_user_can( 'manage_options' ) ) {
-        return;
+function li_cw_sync_comment_ip_schedule() {
+    if ( li_cw_comment_ip_enabled() ) {
+        li_cw_schedule_comment_ip_backfill();
+    } else {
+        wp_clear_scheduled_hook( 'li_cw_backfill_comment_ip' );
     }
-    if ( get_transient( 'li_cw_ip_backfill_lock' ) ) {
-        return;
-    }
-    set_transient( 'li_cw_ip_backfill_lock', 1, 5 * MINUTE_IN_SECONDS );
-    li_cw_backfill_comment_ip( 5 );
 }
-add_action( 'admin_init', 'li_cw_maybe_backfill_comment_ip_on_admin' );
+add_action( 'customize_save_after', 'li_cw_sync_comment_ip_schedule', 20 );
 
 /**
- * 自定义器保存后，若刚开启 IP 属地，立即补一批历史评论
+ * 停用主题时清除定时任务（与 link-feed 同一套清理机制）
  */
-function li_cw_backfill_after_customize() {
-    if ( li_cw_comment_ip_enabled() ) {
-        li_cw_backfill_comment_ip( 5 );
-    }
+function li_cw_clear_comment_ip_cron() {
+    wp_clear_scheduled_hook( 'li_cw_backfill_comment_ip' );
+    wp_clear_scheduled_hook( 'li_cw_lookup_comment_ip' );
 }
-add_action( 'customize_save_after', 'li_cw_backfill_after_customize' );
+add_action( 'switch_theme', 'li_cw_clear_comment_ip_cron' );

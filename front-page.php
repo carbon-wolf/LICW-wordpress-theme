@@ -3,6 +3,8 @@
  * 首页模板
  * 包含 Hero、最新日志、精选作品
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
 get_header();
 ?>
 
@@ -61,9 +63,12 @@ get_header();
         <section class="home-section home-featured-projects" id="projects">
             <h2 class="section-title reveal">
                 <span><?php esc_html_e( '精选作品', 'li-cw' ); ?></span>
-                <a href="<?php echo esc_url( get_post_type_archive_link( 'project' ) ); ?>" class="more-link">
+                <?php $projects_link = get_post_type_archive_link( 'project' ); ?>
+                <?php if ( $projects_link ) : ?>
+                <a href="<?php echo esc_url( $projects_link ); ?>" class="more-link">
                     <?php esc_html_e( '查看所有作品 →', 'li-cw' ); ?>
                 </a>
+                <?php endif; ?>
             </h2>
 
             <div class="projects-grid">

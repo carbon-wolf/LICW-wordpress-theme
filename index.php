@@ -4,6 +4,8 @@
  * WordPress 主题必备，作为所有页面的最终回退模板
  * @package Li_CW_Theme
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
 get_header();
 ?>
 

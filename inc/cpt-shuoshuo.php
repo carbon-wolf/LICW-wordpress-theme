@@ -40,35 +40,57 @@ add_action( 'init', 'li_cw_register_shuoshuo_cpt' );
  * 说说点赞 REST API
  * POST /wp-json/licw/v1/shuoshuo/{id}/like
  * Body: { action: "like" | "unlike" }
+ * 安全层（nonce / 限流 / 凭证 / 原子计数）复用 comment-like.php 公共函数。
  */
 function li_cw_register_like_route() {
     register_rest_route( 'licw/v1', '/shuoshuo/(?P<id>\d+)/like', array(
         'methods'             => 'POST',
         'callback'            => 'li_cw_handle_shuoshuo_like',
-        'permission_callback' => '__return_true',
+        'permission_callback' => '__return_true', // 公开接口，安全由 nonce + 限流 + 状态校验保障
+        'args'                => array(
+            'action' => array(
+                'type'              => 'string',
+                'required'          => true,
+                'enum'              => array( 'like', 'unlike' ),
+                'sanitize_callback' => 'sanitize_key',
+            ),
+        ),
     ));
 }
 add_action( 'rest_api_init', 'li_cw_register_like_route' );
 
 function li_cw_handle_shuoshuo_like( $request ) {
+    $verify = li_cw_verify_like_request( $request );
+    if ( is_wp_error( $verify ) ) {
+        return $verify;
+    }
+
     $post_id = (int) $request['id'];
+    $post    = get_post( $post_id );
 
-    if ( ! get_post( $post_id ) || get_post_type( $post_id ) !== 'shuoshuo' ) {
-        return new WP_Error( 'invalid_post', 'Not a shuoshuo', array( 'status' => 404 ) );
+    if ( ! $post || 'shuoshuo' !== $post->post_type || 'publish' !== $post->post_status ) {
+        return new WP_Error( 'invalid_post', __( '无效的说说。', 'li-cw' ), array( 'status' => 404 ) );
     }
 
-    $likes = (int) get_post_meta( $post_id, 'li_cw_shuoshuo_likes', true );
-    $action = $request->get_param( 'action' );
+    $action    = $request->get_param( 'action' );
+    $proof_key = li_cw_like_proof_key( 'shuoshuo', $post_id );
 
-    if ( $action === 'unlike' && $likes > 0 ) {
-        $likes--;
-        update_post_meta( $post_id, 'li_cw_shuoshuo_likes', $likes );
-    } elseif ( $action === 'like' ) {
-        $likes++;
-        update_post_meta( $post_id, 'li_cw_shuoshuo_likes', $likes );
+    if ( 'like' === $action ) {
+        if ( li_cw_like_has_proof( $proof_key ) ) {
+            // 幂等：已点赞过，返回当前计数
+            return array( 'likes' => (int) get_post_meta( $post_id, 'li_cw_shuoshuo_likes', true ), 'idempotent' => true );
+        }
+        li_cw_meta_atomic_increment( 'post', $post_id, 'li_cw_shuoshuo_likes' );
+        li_cw_mark_like_proof( $proof_key );
+    } else {
+        if ( ! li_cw_like_has_proof( $proof_key ) ) {
+            return new WP_Error( 'li_cw_not_liked', __( '尚未点赞过该说说。', 'li-cw' ), array( 'status' => 409 ) );
+        }
+        li_cw_meta_atomic_decrement( 'post', $post_id, 'li_cw_shuoshuo_likes' );
+        li_cw_clear_like_proof( $proof_key );
     }
 
-    return array( 'likes' => $likes );
+    return array( 'likes' => (int) get_post_meta( $post_id, 'li_cw_shuoshuo_likes', true ) );
 }
 
 /**

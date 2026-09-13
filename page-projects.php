@@ -3,6 +3,8 @@
  * Template Name: 作品列表页
  * 展示全部作品
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
 get_header();
 ?>
 

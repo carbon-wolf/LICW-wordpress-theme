@@ -3,6 +3,8 @@
  * Template Name: 说说页面
  * 按时间倒序展示所有说说
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
 get_header();
 ?>
 

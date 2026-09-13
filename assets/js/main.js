@@ -416,25 +416,29 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }
-        // ========== 评论草稿自动保存 ==========
+        // ========== 评论草稿自动保存（按评论对象隔离，避免跨文章串扰） ==========
     const commentTextarea = document.getElementById('comment');
-    const STORAGE_KEY = 'li_cw_comment_draft';
+    const draftBaseKey = 'li_cw_comment_draft';
 
     if (commentTextarea) {
+        // 草稿键拼入评论对象 ID：普通文章各自独立，无 comment_post_ID 时（异常兜底）退回全局键
+        const formPostIdEl = document.querySelector('#commentform input[name="comment_post_ID"]');
+        const draftKey = formPostIdEl ? draftBaseKey + '_' + formPostIdEl.value : draftBaseKey;
+
         // 页面加载时恢复草稿
-        const saved = localStorage.getItem(STORAGE_KEY);
+        const saved = localStorage.getItem(draftKey);
         if (saved) commentTextarea.value = saved;
 
         // 输入时自动保存
         commentTextarea.addEventListener('input', function() {
-            localStorage.setItem(STORAGE_KEY, this.value);
+            localStorage.setItem(draftKey, this.value);
         });
 
         // 提交表单后清空草稿
         const commentForm = commentTextarea.closest('form');
         if (commentForm) {
             commentForm.addEventListener('submit', function() {
-                localStorage.removeItem(STORAGE_KEY);
+                localStorage.removeItem(draftKey);
             });
         }
     }
@@ -457,6 +461,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ========== 点赞（说说 / 评论） ==========
+    // 接口地址与 nonce 由 functions.php wp_localize_script 下发
+    const likeCfg = window.liCwLikeCfg || null;
+
     function getLikedIds(cookieName) {
         const match = document.cookie.match(new RegExp('(?:^|;\\s*)' + cookieName + '=([^;]*)'));
         if (match) {
@@ -472,7 +479,7 @@ document.addEventListener('DOMContentLoaded', function() {
             + ';path=/;expires=' + d.toUTCString() + ';SameSite=Lax';
     }
 
-    function initLikeButtons(selector, idAttr, countSelector, cookieName, endpoint) {
+    function initLikeButtons(selector, idAttr, countSelector, cookieName, endpointPath) {
         const liked = getLikedIds(cookieName);
 
         document.querySelectorAll(selector).forEach(function(btn) {
@@ -489,8 +496,18 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             btn.addEventListener('click', function() {
+                // 请求锁：进行中直接忽略，防止连点并发
+                if (btn.dataset.busy) return;
+
+                if (!likeCfg) {
+                    // 配置缺失（极端兜底）：仅本地视觉反馈
+                    btn.classList.toggle('is-liked');
+                    return;
+                }
+
                 const already = btn.classList.contains('is-liked');
                 const action = already ? 'unlike' : 'like';
+                btn.dataset.busy = '1';
 
                 // 乐观更新
                 btn.classList.toggle('is-liked');
@@ -506,25 +523,40 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 setLikedIds(cookieName, ids);
 
-                // 请求服务端
-                fetch(endpoint.replace('__ID__', id), {
+                // 请求服务端（带 nonce、校验 HTTP 状态）
+                fetch(likeCfg.restUrl + endpointPath.replace('__ID__', id), {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Li-Cw-Nonce': likeCfg.nonce
+                    },
                     body: JSON.stringify({ action: action })
+                }).then(function(r) {
+                    if (!r.ok) {
+                        throw new Error('HTTP ' + r.status);
+                    }
+                    return r.json().then(function(data) {
+                        // 服务端计数回写：窗口内幂等或正常响应均以服务端为准
+                        if (data && typeof data.likes === 'number') {
+                            countEl.textContent = data.likes;
+                        }
+                    });
                 }).catch(function() {
-                    // 网络失败时回滚
+                    // 网络失败 / HTTP 错误：回滚视觉与 cookie
                     btn.classList.toggle('is-liked');
                     countEl.textContent = currentCount;
                     setLikedIds(cookieName, action === 'like' ? ids.filter(function(x) { return x !== id; }) : ids.concat(id));
+                }).finally(function() {
+                    delete btn.dataset.busy;
                 });
             });
         });
     }
 
     // 说说点赞
-    initLikeButtons('.like-btn', 'data-post-id', '.like-count', 'li_cw_likes', '/wp-json/licw/v1/shuoshuo/__ID__/like');
+    initLikeButtons('.like-btn', 'data-post-id', '.like-count', 'li_cw_likes', 'shuoshuo/__ID__/like');
     // 评论点赞
-    initLikeButtons('.comment-like-btn', 'data-comment-id', '.comment-like-count', 'li_cw_comment_likes', '/wp-json/licw/v1/comment/__ID__/like');
+    initLikeButtons('.comment-like-btn', 'data-comment-id', '.comment-like-count', 'li_cw_comment_likes', 'comment/__ID__/like');
 
     // ========== 照片墙瀑布流 (Masonry) ==========
     var masonryGrid = document.getElementById('masonry-grid');

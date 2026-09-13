@@ -3,6 +3,8 @@
  * 404 错误页面模板
  * @package Li_CW_Theme
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
 get_header();
 ?>
 

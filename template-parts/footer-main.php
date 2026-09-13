@@ -6,13 +6,15 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 $beian = li_cw_get_option( 'li_cw_beian' );
+// 默认版权：年份动态生成（自定义文案优先）
+$default_copyright = sprintf( '© %s Li CW. All rights reserved.', wp_date( 'Y' ) );
 ?>
 <footer class="site-footer">
     <div class="container">
         <div class="footer-inner">
             <!-- 左组：站点归属信息 -->
             <div class="footer-group">
-                <span class="footer-copyright"><?php echo esc_html( li_cw_get_option( 'li_cw_footer_copyright', '© 2026 Li CW. All rights reserved.' ) ); ?></span>
+                <span class="footer-copyright"><?php echo esc_html( li_cw_get_option( 'li_cw_footer_copyright', $default_copyright ) ); ?></span>
                 <?php if ( $beian ) : ?>
                     <span class="footer-beian">
                         <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">

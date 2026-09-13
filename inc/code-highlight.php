@@ -6,16 +6,15 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 function li_cw_enqueue_code_highlight() {
-    // 只在单篇文章页加载
-    if ( ! is_single() ) return;
+    // 单篇内容页（文章/页面/照片等）加载
+    if ( ! is_singular() ) return;
 
     global $post;
     if ( ! is_a( $post, 'WP_Post' ) ) return;
 
-    // 兼容三种代码形式：古腾堡原生代码块、pre标签、code短代码
+    // 兼容三种代码形式：古腾堡原生代码块、pre标签
     $has_code = false;
     if ( function_exists('has_block') && has_block( 'core/code', $post ) ) $has_code = true;
-    if ( has_shortcode( $post->post_content, 'code' ) ) $has_code = true;
     if ( strpos( $post->post_content, '<pre' ) !== false ) $has_code = true;
 
     if ( ! $has_code ) return;

@@ -9,11 +9,24 @@ $title    = li_cw_get_option( 'li_cw_home_title', 'Li CW' );
 $subtitle = li_cw_get_option( 'li_cw_home_subtitle', '高中生开发者 / 写作者' );
 $desc     = li_cw_get_option( 'li_cw_home_desc', '正在制作《凭君之光》，记录创作、设计与思考。' );
 $btn1_text = li_cw_get_option( 'li_cw_home_btn1_text', '查看作品' );
-$btn1_link = li_cw_get_option( 'li_cw_home_btn1_link', get_post_type_archive_link( 'project' ) );
+// 主按钮默认链到作品归档（customizer 默认值同源：项目归档开启时优先）
+$btn1_default = get_post_type_archive_link( 'project' );
+if ( ! $btn1_default ) {
+    $btn1_default = '#projects'; // 归档关闭时退回锚点
+}
+$btn1_link = li_cw_get_option( 'li_cw_home_btn1_link', $btn1_default );
 $btn2_text = li_cw_get_option( 'li_cw_home_btn2_text', '关于我' );
-// 默认关于页链接：自动识别slug为about的页面
-$about_page = get_page_by_path( 'about' );
-$default_about_link = $about_page ? get_permalink( $about_page ) : '#';
+// 默认关于页链接：自动识别关于页模板页面（原 get_page_by_path('about') 在 WP 6.2+ 已弃用）
+$about_page_args = array(
+    'post_type'  => 'page',
+    'post_status' => 'publish',
+    'numberposts' => 1,
+    'fields'     => 'ids',
+    'meta_key'   => '_wp_page_template',
+    'meta_value' => 'page-about.php',
+);
+$about_page_ids   = get_posts( $about_page_args );
+$default_about_link = $about_page_ids ? get_permalink( $about_page_ids[0] ) : '#';
 $btn2_link = li_cw_get_option( 'li_cw_home_btn2_link', $default_about_link );
 $hero_img = li_cw_get_option( 'li_cw_home_hero_image' );
 $hero_img = $hero_img ? li_cw_fix_asset_url( $hero_img ) : '';

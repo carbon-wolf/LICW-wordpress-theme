@@ -3,6 +3,8 @@
  * Template Name: 关于页
  * 顶部个人信息卡 + 下方自由长文（页面编辑器输出）
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
 get_header();
 
 $avatar   = li_cw_get_option( 'li_cw_about_avatar' );

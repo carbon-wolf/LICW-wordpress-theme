@@ -408,12 +408,17 @@ function li_cw_format_feed_items( $items ) {
 
     $out = array();
     foreach ( $items as $item ) {
+        // 仅放行 http(s) 链接——恶意 feed 可返回 javascript: 等协议
+        $safe_link = esc_url_raw( $item['link'] );
+        if ( ! preg_match( '#^https?://#i', $safe_link ) ) {
+            continue;
+        }
         $row = array(
-            'title' => $item['title'],
-            'link'  => $item['link'],
+            'title' => wp_strip_all_tags( $item['title'] ),
+            'link'  => $safe_link,
         );
         if ( $show_date && ! empty( $item['date'] ) ) {
-            $row['date_human'] = human_time_diff( $item['date'] ) . __( '前', 'li-cw' );
+            $row['date_human'] = sprintf( __( '%s前', 'li-cw' ), human_time_diff( $item['date'] ) );
             $row['date_iso']   = gmdate( 'Y-m-d', $item['date'] );
         }
         $out[] = $row;
@@ -423,21 +428,19 @@ function li_cw_format_feed_items( $items ) {
 
 /**
  * REST：按需抓取单条友链的文章
- * GET /wp-json/licw/v1/link-feed?link_id={id}&count={n}
+ * GET /wp-json/licw/v1/link-feed?link_id={id}
  * 前台懒加载使用，避免阻塞页面，也不依赖 WP-Cron。
+ * count 不接受请求参数——固定为自定义器配置值，
+ * 防止匿名请求枚举 count 制造缓存击穿、放大外站抓取。
  */
 function li_cw_register_link_feed_route() {
     register_rest_route( 'licw/v1', '/link-feed', array(
         'methods'             => 'GET',
         'callback'            => 'li_cw_rest_link_feed',
-        'permission_callback' => '__return_true',
+        'permission_callback' => '__return_true', // 只读公开数据
         'args'                => array(
             'link_id' => array(
                 'required'          => true,
-                'sanitize_callback' => 'absint',
-            ),
-            'count'   => array(
-                'default'           => 3,
                 'sanitize_callback' => 'absint',
             ),
         ),
@@ -453,7 +456,7 @@ add_action( 'rest_api_init', 'li_cw_register_link_feed_route' );
  */
 function li_cw_rest_link_feed( $request ) {
     $link_id = absint( $request->get_param( 'link_id' ) );
-    $count   = max( 1, min( 10, absint( $request->get_param( 'count' ) ) ) );
+    $count   = max( 1, min( 10, absint( li_cw_get_option( 'li_cw_links_feed_count', 3 ) ) ) );
 
     $bookmark = $link_id ? get_bookmark( $link_id ) : null;
     if ( ! $bookmark || ! li_cw_link_has_feed( $bookmark ) ) {
@@ -465,26 +468,7 @@ function li_cw_rest_link_feed( $request ) {
 }
 
 /**
- * AJAX 兼容入口（部分环境 REST 被关闭时可用）
- */
-function li_cw_ajax_link_feed() {
-    $link_id = isset( $_REQUEST['link_id'] ) ? absint( $_REQUEST['link_id'] ) : 0;
-    $count   = isset( $_REQUEST['count'] ) ? absint( $_REQUEST['count'] ) : 3;
-    $count   = max( 1, min( 10, $count ) );
-
-    $bookmark = $link_id ? get_bookmark( $link_id ) : null;
-    if ( ! $bookmark || ! li_cw_link_has_feed( $bookmark ) ) {
-        wp_send_json_error();
-    }
-
-    $items = li_cw_get_link_feed_items( $bookmark, $count );
-    wp_send_json_success( array( 'items' => li_cw_format_feed_items( $items ) ) );
-}
-add_action( 'wp_ajax_li_cw_link_feed', 'li_cw_ajax_link_feed' );
-add_action( 'wp_ajax_nopriv_li_cw_link_feed', 'li_cw_ajax_link_feed' );
-
-/**
- * 收集所有开启了抓取的分类下的友链
+ * 收集所有开启了抓取的分类下的友链（按 link_id 去重，防多分类重复抓取）
  *
  * @return array
  */
@@ -504,19 +488,27 @@ function li_cw_get_feed_enabled_bookmarks() {
         }
         $found = get_bookmarks( array( 'category' => $term->term_id ) );
         if ( $found ) {
-            $bookmarks = array_merge( $bookmarks, $found );
+            foreach ( $found as $bookmark ) {
+                $bookmarks[ $bookmark->link_id ] = $bookmark;
+            }
         }
     }
-    return $bookmarks;
+    return array_values( $bookmarks );
 }
 
 /**
  * 抓取任务：逐个刷新开启了抓取的友链文章缓存
+ * 带时间预算（默认 50s），超时自动终止，避免超出 PHP max_execution_time
  */
 function li_cw_refresh_link_feeds() {
-    $count = max( 1, min( 10, absint( li_cw_get_option( 'li_cw_links_feed_count', 3 ) ) ) );
+    $count   = max( 1, min( 10, absint( li_cw_get_option( 'li_cw_links_feed_count', 3 ) ) ) );
+    $start   = microtime( true );
+    $budget  = 50; // 秒；留出余量给常见的 60s 限制
 
     foreach ( li_cw_get_feed_enabled_bookmarks() as $bookmark ) {
+        if ( microtime( true ) - $start > $budget ) {
+            break;
+        }
         $key = li_cw_link_feed_cache_key( $bookmark, $count );
         delete_transient( $key );
         li_cw_get_link_feed_items( $bookmark, $count );

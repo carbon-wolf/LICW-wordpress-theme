@@ -268,10 +268,8 @@ function li_cw_parse_apple_emoji( $text ) {
         return $text;
     }
 
+    // 不做预检：regex 未命中时 callback 原样返回，预检只是双倍正则开销
     $regex = li_cw_apple_emoji_regex();
-    if ( ! preg_match( $regex, $text ) ) {
-        return $text;
-    }
 
     return li_cw_emoji_replace_outside_code( $text, function ( $part ) use ( $regex ) {
         return preg_replace_callback( $regex, function ( $m ) {

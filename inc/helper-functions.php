@@ -60,21 +60,26 @@ function li_cw_fix_asset_url( $url ) {
 function li_cw_get_custom_css() {
     $css = '';
 
-    // 读取配色 — OKLCH 默认值
-    $bg_page = li_cw_get_option( 'li_cw_bg_page', 'oklch(97.5% 0.005 95)' );
-    $bg_card = li_cw_get_option( 'li_cw_bg_card', 'oklch(99% 0.003 95)' );
-    $text_primary = li_cw_get_option( 'li_cw_text_primary', 'oklch(15% 0.005 170)' );
-    $text_secondary = li_cw_get_option( 'li_cw_text_secondary', 'oklch(48% 0.005 170)' );
-    $accent = li_cw_get_option( 'li_cw_accent', 'oklch(30% 0.055 170)' );
-    $accent_gold = li_cw_get_option( 'li_cw_accent_gold', 'oklch(68% 0.09 82)' );
-    $border = li_cw_get_option( 'li_cw_border', 'oklch(91% 0.008 95)' );
+    // CSS 颜色/字体值净化：剥掉可破坏样式的结构性字符（管理员字段，纵深防御）
+    $safe_value = function ( $value ) {
+        return preg_replace( '/[{};@]/', '', (string) $value );
+    };
 
-    // 读取字体
-    $font_display = li_cw_get_option( 'li_cw_font_display' );
-    $font_heading = li_cw_get_option( 'li_cw_font_heading' );
-    $font_body = li_cw_get_option( 'li_cw_font_body' );
-    $font_ui = li_cw_get_option( 'li_cw_font_ui' );
-    $font_accent = li_cw_get_option( 'li_cw_font_accent' );
+    // 读取配色 — OKLCH 默认值（与 customizer.php / style.css 三方保持一致）
+    $bg_page = $safe_value( li_cw_get_option( 'li_cw_bg_page', 'oklch(97.5% 0.005 95)' ) );
+    $bg_card = $safe_value( li_cw_get_option( 'li_cw_bg_card', 'oklch(99% 0.003 95)' ) );
+    $text_primary = $safe_value( li_cw_get_option( 'li_cw_text_primary', 'oklch(15% 0.005 170)' ) );
+    $text_secondary = $safe_value( li_cw_get_option( 'li_cw_text_secondary', 'oklch(42% 0.005 170)' ) );
+    $accent = $safe_value( li_cw_get_option( 'li_cw_accent', 'oklch(30% 0.055 170)' ) );
+    $accent_gold = $safe_value( li_cw_get_option( 'li_cw_accent_gold', 'oklch(68% 0.09 82)' ) );
+    $border = $safe_value( li_cw_get_option( 'li_cw_border', 'oklch(91% 0.008 95)' ) );
+
+    // 读取字体（引号与逗号合法，仅过滤结构性字符）
+    $font_display = $safe_value( li_cw_get_option( 'li_cw_font_display' ) );
+    $font_heading = $safe_value( li_cw_get_option( 'li_cw_font_heading' ) );
+    $font_body    = $safe_value( li_cw_get_option( 'li_cw_font_body' ) );
+    $font_ui      = $safe_value( li_cw_get_option( 'li_cw_font_ui' ) );
+    $font_accent  = $safe_value( li_cw_get_option( 'li_cw_font_accent' ) );
 
     // 拼接变量
     $css .= ":root {";
@@ -86,7 +91,7 @@ function li_cw_get_custom_css() {
     $css .= "--accent-gold: {$accent_gold};";
     $css .= "--border-color: {$border};";
 
-    // 字体变量 — display 已合并入 heading
+    // 字体变量 — display 为旧字段，heading 优先级更高（显式设置过则覆盖 display）
     if ( $font_display ) $css .= "--font-heading: {$font_display};";
     if ( $font_heading ) $css .= "--font-heading: {$font_heading};";
     if ( $font_body ) $css .= "--font-body: {$font_body};";
@@ -328,7 +333,7 @@ function li_cw_count_gallery_images() {
 }
 
 /**
- * 照片内容变更时清除图片计数缓存
+ * 照片内容/附件变更时清除图片计数缓存
  */
 function li_cw_clear_gallery_count_cache( $post_id ) {
     if ( 'photo' === get_post_type( $post_id ) ) {
@@ -337,3 +342,8 @@ function li_cw_clear_gallery_count_cache( $post_id ) {
 }
 add_action( 'save_post', 'li_cw_clear_gallery_count_cache' );
 add_action( 'delete_post', 'li_cw_clear_gallery_count_cache' );
+
+// 附件被删除时同样失效（照片未被编辑但图片被删）
+add_action( 'delete_attachment', function () {
+    delete_transient( 'li_cw_gallery_image_count_v2' );
+} );

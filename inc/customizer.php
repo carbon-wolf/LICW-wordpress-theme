@@ -5,6 +5,68 @@
  */
 if ( ! defined( 'ABSPATH' ) ) exit;
 
+/**
+ * SVG 专用消毒：仅放行安全的内联 SVG 标签/属性
+ * （wp_kses_post 白名单不含 svg 标签，会把整段 SVG 清空）
+ *
+ * @param string $svg 原始输入
+ * @return string
+ */
+function li_cw_sanitize_svg( $svg ) {
+    $svg = (string) $svg;
+    if ( '' === trim( $svg ) ) {
+        return '';
+    }
+
+    $allowed_tags = array(
+        'svg'    => array(
+            'xmlns' => true, 'viewbox' => true, 'width' => true, 'height' => true,
+            'fill' => true, 'stroke' => true, 'stroke-width' => true, 'class' => true,
+            'aria-hidden' => true, 'role' => true,
+        ),
+        'path'   => array(
+            'd' => true, 'fill' => true, 'stroke' => true, 'stroke-width' => true,
+            'stroke-linecap' => true, 'stroke-linejoin' => true, 'fill-rule' => true,
+            'clip-rule' => true, 'class' => true,
+        ),
+        'circle' => array( 'cx' => true, 'cy' => true, 'r' => true, 'fill' => true, 'stroke' => true, 'class' => true ),
+        'rect'   => array( 'x' => true, 'y' => true, 'width' => true, 'height' => true, 'rx' => true, 'fill' => true, 'class' => true ),
+        'line'   => array( 'x1' => true, 'y1' => true, 'x2' => true, 'y2' => true, 'stroke' => true, 'stroke-width' => true, 'class' => true ),
+        'polyline' => array( 'points' => true, 'fill' => true, 'stroke' => true, 'class' => true ),
+        'polygon'  => array( 'points' => true, 'fill' => true, 'class' => true ),
+        'g'      => array( 'fill' => true, 'stroke' => true, 'transform' => true, 'class' => true ),
+        'title'  => array(),
+    );
+
+    $clean = wp_kses( $svg, $allowed_tags );
+
+    // 必须是合法 SVG 起始，否则视为无效输入整体丢弃
+    return ( 0 === strpos( trim( $clean ), '<svg' ) ) ? $clean : '';
+}
+
+/**
+ * 页脚自定义 HTML 消毒：kses post 白名单 + 统计代码所需标签
+ * （描述明确承诺可加统计代码，wp_kses_post 会剥掉 script）
+ *
+ * @param string $html 原始输入
+ * @return string
+ */
+function li_cw_sanitize_footer_html( $html ) {
+    $allowed = wp_kses_allowed_html( 'post' );
+    // 统计代码通常只需要 script + 常规属性，管理员权限专用字段
+    $allowed['script'] = array(
+        'src'      => true,
+        'async'    => true,
+        'defer'    => true,
+        'type'     => true,
+        'id'       => true,
+        'nonce'    => true,
+        'crossorigin' => true,
+        'integrity'=> true,
+    );
+    return wp_kses( (string) $html, $allowed );
+}
+
 function li_cw_register_customizer( $wp_customize ) {
 
     // ========== 1. 首页文案设置 ==========
@@ -84,9 +146,10 @@ function li_cw_register_customizer( $wp_customize ) {
         'default'           => '关于我',
         'sanitize_callback' => 'sanitize_text_field',
     ));
-    $wp_customize->add_setting( 'li_cw_home_btn2_link', array(
-        'default'           => '',
-        'sanitize_callback' => 'esc_url_raw',
+    $wp_customize->add_control( 'li_cw_home_btn2_text', array(
+        'section'  => 'li_cw_section_home',
+        'label'    => esc_html__( '次按钮文字', 'li-cw' ),
+        'type'     => 'text',
     ));
 
     // 次按钮链接
@@ -162,7 +225,7 @@ function li_cw_register_customizer( $wp_customize ) {
         'li_cw_bg_page'      => array( 'label' => '页面背景色', 'default' => 'oklch(97.5% 0.005 95)' ),
         'li_cw_bg_card'      => array( 'label' => '卡片背景色', 'default' => 'oklch(99% 0.003 95)' ),
         'li_cw_text_primary' => array( 'label' => '主文字色', 'default' => 'oklch(15% 0.005 170)' ),
-        'li_cw_text_secondary' => array( 'label' => '辅助文字色', 'default' => 'oklch(48% 0.005 170)' ),
+        'li_cw_text_secondary' => array( 'label' => '辅助文字色', 'default' => 'oklch(42% 0.005 170)' ),
         'li_cw_accent'       => array( 'label' => '主强调色', 'default' => 'oklch(30% 0.055 170)' ),
         'li_cw_accent_gold'  => array( 'label' => '金色辅助色', 'default' => 'oklch(68% 0.09 82)' ),
         'li_cw_border'       => array( 'label' => '边框分割线色', 'default' => 'oklch(91% 0.008 95)' ),
@@ -285,7 +348,7 @@ function li_cw_register_customizer( $wp_customize ) {
         // ====== 自定义SVG代码（可选，填了覆盖预设）======
         $wp_customize->add_setting( "li_cw_social_{$num}_custom_icon", array(
             'default'           => '',
-            'sanitize_callback' => 'wp_kses_post',
+            'sanitize_callback' => 'li_cw_sanitize_svg',
         ));
         $wp_customize->add_control( "li_cw_social_{$num}_custom_icon", array(
             'section' => 'li_cw_section_about',
@@ -297,6 +360,11 @@ function li_cw_register_customizer( $wp_customize ) {
 
 
     // ========== 4. 页脚设置 ==========
+    $wp_customize->add_section( 'li_cw_section_footer', array(
+        'title'       => esc_html__( '页脚设置', 'li-cw' ),
+        'priority'    => 50,
+    ));
+
     // ICP备案号
     $wp_customize->add_setting( 'li_cw_beian', array(
         'default'           => '',
@@ -307,10 +375,6 @@ function li_cw_register_customizer( $wp_customize ) {
         'label'   => esc_html__( 'ICP备案号', 'li-cw' ),
         'type'    => 'text',
         'description' => '填写后自动在页脚显示并链接到工信部备案平台',
-    ));
-    $wp_customize->add_section( 'li_cw_section_footer', array(
-        'title'       => esc_html__( '页脚设置', 'li-cw' ),
-        'priority'    => 50,
     ));
 
     $wp_customize->add_setting( 'li_cw_footer_copyright', array(
@@ -355,7 +419,7 @@ function li_cw_register_customizer( $wp_customize ) {
     // 页脚自定义 HTML
     $wp_customize->add_setting( 'li_cw_footer_custom_html', array(
         'default'           => '',
-        'sanitize_callback' => 'wp_kses_post',
+        'sanitize_callback' => 'li_cw_sanitize_footer_html',
     ));
     $wp_customize->add_control( 'li_cw_footer_custom_html', array(
         'section'     => 'li_cw_section_footer',

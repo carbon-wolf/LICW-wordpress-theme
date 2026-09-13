@@ -3,6 +3,8 @@
  * 默认页面模板
  * 普通页面通用
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
 get_header();
 ?>
 

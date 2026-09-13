@@ -6,6 +6,9 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 function li_cw_theme_setup() {
+    // 加载翻译文件（languages/ 目录）
+    load_theme_textdomain( 'li-cw', get_template_directory() . '/languages' );
+
     // 自动生成页面title标签
     add_theme_support( 'title-tag' );
 
@@ -25,11 +28,6 @@ function li_cw_theme_setup() {
         'comment-list',
         'gallery',
         'caption',
-    ));
-
-    // 自定义背景
-    add_theme_support( 'custom-background', array(
-        'default-color' => 'f8f6f1',
     ));
 
     // 自动生成feed链接

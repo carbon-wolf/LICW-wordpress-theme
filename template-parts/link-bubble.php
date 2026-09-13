@@ -17,7 +17,8 @@ if ( ! $link ) {
 
 $feed_count   = isset( $args['feed_count'] ) ? absint( $args['feed_count'] ) : 3;
 $feed_enabled = li_cw_link_has_feed( $link );
-$feed_items   = $feed_enabled ? li_cw_get_link_feed_items_cached( $link, $feed_count ) : null;
+// 复用调用方（page-links.php）已查过的缓存，避免同一 transient 读两次
+$feed_items   = $feed_enabled && isset( $args['feed_items'] ) ? $args['feed_items'] : ( $feed_enabled ? li_cw_get_link_feed_items_cached( $link, $feed_count ) : null );
 $show_date    = li_cw_get_option( 'li_cw_links_feed_date', true );
 $is_pending   = $feed_enabled && ! is_array( $feed_items );
 ?>

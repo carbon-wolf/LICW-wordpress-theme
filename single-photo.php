@@ -3,6 +3,8 @@
  * 单张照片模板
  * 显示完整照片、拍摄信息、简介与评论区
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
 get_header();
 ?>
 

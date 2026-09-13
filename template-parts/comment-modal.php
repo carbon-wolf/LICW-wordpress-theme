@@ -41,7 +41,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                     'cookies' => '<p class="comment-form-cookies"><label><input type="checkbox" name="wp-comment-cookies-consent" value="yes"' . $consent . '> ' . esc_html__( '本地保存我的信息，以便下次评论时使用。', 'li-cw' ) . '</label></p>',
                 ),
                 'comment_field' => '<p class="comment-form-comment"><label>' . esc_html__( '评论内容', 'li-cw' ) . ' *</label><span class="comment-input"><textarea name="comment" id="comment" rows="4" autocomplete="off" required></textarea><button type="button" class="emoji-toggle" aria-label="' . esc_attr__( '插入表情', 'li-cw' ) . '" aria-expanded="false" aria-controls="emojiPanel"><img src="' . esc_url( LI_CW_THEME_URI . '/assets/images/wechat/smile.png' ) . '" alt="" width="20" height="20"></button><span class="emoji-panel" id="emojiPanel" hidden role="dialog" aria-label="' . esc_attr__( '表情', 'li-cw' ) . '"></span></span></p>',
-                'label_submit'  => esc_html__( '', 'li-cw' ),
+                'label_submit'  => esc_html__( '发表评论', 'li-cw' ),
                 'submit_button' => '<button type="submit" class="btn-primary">%4$s</button>',
                 'must_log_in'   => '<p class="must-log-in" style="font-size:0.9rem; color:var(--text-secondary);">' . esc_html__( '请先登录后发表评论', 'li-cw' ) . '</p>',
             ));

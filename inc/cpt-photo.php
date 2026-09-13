@@ -112,14 +112,7 @@ function li_cw_save_photo_meta( $post_id ) {
 
     // 保存相机器材
     if ( isset( $_POST['li_cw_photo_camera'] ) ) {
-        update_post_meta( $post_id, 'li_cw_photo_camera', sanitize_text_field( $_POST['li_cw_photo_camera'] ) );
-    }
-
-    // 保存卡片类型（默认 photo）
-    if ( isset( $_POST['li_cw_photo_type'] ) && in_array( $_POST['li_cw_photo_type'], array( 'photo' ), true ) ) {
-        update_post_meta( $post_id, 'li_cw_photo_type', 'photo' );
-    } else {
-        update_post_meta( $post_id, 'li_cw_photo_type', 'photo' );
+        update_post_meta( $post_id, 'li_cw_photo_camera', sanitize_text_field( wp_unslash( $_POST['li_cw_photo_camera'] ) ) );
     }
 }
-add_action( 'save_post', 'li_cw_save_photo_meta' );
+add_action( 'save_post_photo', 'li_cw_save_photo_meta' );

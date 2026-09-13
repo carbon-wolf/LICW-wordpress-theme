@@ -134,8 +134,8 @@ function li_cw_output_og_meta() {
         }
     }
 
-    // Twitter Card
-    echo '<meta name="twitter:card" content="summary_large_image" />' . "\n";
+    // Twitter Card（无图时降级为小卡，不虚报 large_image）
+    echo '<meta name="twitter:card" content="' . ( $data['image'] ? 'summary_large_image' : 'summary' ) . '" />' . "\n";
     echo '<meta name="twitter:title" content="' . esc_attr( $data['title'] ) . '" />' . "\n";
     echo '<meta name="twitter:description" content="' . esc_attr( $data['description'] ) . '" />' . "\n";
     if ( $data['image'] ) {

@@ -2,6 +2,8 @@
 /**
  * 单篇文章模板
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
 get_header();
 ?>
 
@@ -34,7 +36,7 @@ get_header();
                     ?>
                 </div>
 
-                <h1 class="single-title"><?php the_title(); ?></h1>
+                <h1 class="single-title"><?php echo esc_html( get_the_title() ); ?></h1>
             </header>
 
             <!-- 特色图 -->
@@ -54,35 +56,28 @@ get_header();
             </div>
             </div><!-- .single-body -->
         </article>
-                <!-- 上一篇 / 下一篇导航 -->
+        <!-- 上一篇 / 下一篇导航 -->
         <div class="post-navigation">
-            <div class="nav-prev">
-                <?php
-                $prev_post = get_previous_post();
-                if ( $prev_post ) :
-                ?>
-                    <span class="nav-label"><?php esc_html_e( '上一篇', 'li-cw' ); ?></span>
-                    <a href="<?php echo get_permalink( $prev_post->ID ); ?>" 
-                       class="nav-title" 
-                       title="<?php echo esc_attr( $prev_post->post_title ); ?>">
-                        <?php echo esc_html( $prev_post->post_title ); ?>
-                    </a>
-                <?php endif; ?>
+            <?php
+            // 上下篇结构一致，统一渲染（WordPress 原生 adjacent post）
+            $adjacent = array(
+                array( 'dir' => 'prev', 'post' => get_previous_post(), 'label' => __( '上一篇', 'li-cw' ) ),
+                array( 'dir' => 'next', 'post' => get_next_post(), 'label' => __( '下一篇', 'li-cw' ) ),
+            );
+            foreach ( $adjacent as $item ) :
+                if ( ! $item['post'] ) {
+                    continue;
+                }
+            ?>
+            <div class="nav-<?php echo esc_attr( $item['dir'] ); ?>">
+                <span class="nav-label"><?php echo esc_html( $item['label'] ); ?></span>
+                <a href="<?php echo esc_url( get_permalink( $item['post']->ID ) ); ?>"
+                   class="nav-title"
+                   title="<?php echo esc_attr( $item['post']->post_title ); ?>">
+                    <?php echo esc_html( $item['post']->post_title ); ?>
+                </a>
             </div>
-
-            <div class="nav-next">
-                <?php
-                $next_post = get_next_post();
-                if ( $next_post ) :
-                ?>
-                    <span class="nav-label"><?php esc_html_e( '下一篇', 'li-cw' ); ?></span>
-                    <a href="<?php echo get_permalink( $next_post->ID ); ?>" 
-                       class="nav-title" 
-                       title="<?php echo esc_attr( $next_post->post_title ); ?>">
-                        <?php echo esc_html( $next_post->post_title ); ?>
-                    </a>
-                <?php endif; ?>
-            </div>
+            <?php endforeach; ?>
         </div>
         <?php
         if ( comments_open() || get_comments_number() ) :

@@ -28,10 +28,9 @@ if ( post_password_required() ) return;
         <h3 class="comments-title">
             <?php
             $comment_count = get_comments_number();
-            printf( _n( '1 条评论', '%s 条评论', $comment_count, 'li-cw' ), $comment_count );
+            printf( esc_html( _n( '1 条评论', '%s 条评论', $comment_count, 'li-cw' ) ), (int) $comment_count );
             ?>
         </h3>
-
         <ol class="comment-list">
             <?php
             wp_list_comments( array(
@@ -49,6 +48,12 @@ if ( post_password_required() ) return;
             <div class="comment-pagination" style="text-align:center; margin-top:16px; font-family:var(--font-ui); font-size:0.85rem;">
                 <?php paginate_comments_links( array( 'prev_text' => '←', 'next_text' => '→' ) ); ?>
             </div>
+        <?php endif; ?>
+    <?php else : ?>
+        <?php if ( comments_open() ) : ?>
+            <p style="text-align:center; color:var(--text-secondary); margin-top:8px; font-size:0.9rem;">
+                <?php esc_html_e( '还没有评论，来说两句吧', 'li-cw' ); ?>
+            </p>
         <?php endif; ?>
     <?php endif; ?>
 

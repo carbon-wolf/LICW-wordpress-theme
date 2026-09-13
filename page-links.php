@@ -2,6 +2,8 @@
 /**
  * Template Name: 友链页面
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
 get_header();
 ?>
 
@@ -53,6 +55,7 @@ get_header();
                     // 开启抓取：有内容或待抓取 → 气泡；已确认抓取失败 → 卡片，排在气泡之后
                     $bubbles        = array();
                     $fallback_cards = array();
+                    $feed_cache     = array();
                     foreach ( $bookmarks as $link ) {
                         $items = li_cw_get_link_feed_items_cached( $link, $feed_count );
                         if ( is_array( $items ) && ! $items ) {
@@ -60,6 +63,7 @@ get_header();
                         } else {
                             $bubbles[] = $link;
                         }
+                        $feed_cache[ $link->link_id ] = $items;
                     }
 
                     if ( $bubbles ) :
@@ -70,6 +74,7 @@ get_header();
                         get_template_part( 'template-parts/link-bubble', null, array(
                             'link'       => $link,
                             'feed_count' => $feed_count,
+                            'feed_items' => isset( $feed_cache[ $link->link_id ] ) ? $feed_cache[ $link->link_id ] : null,
                         ) );
                     }
             ?>
@@ -127,14 +132,9 @@ get_header();
         <?php endif; ?>
 
         <?php
+        // 评论开放由 helper-functions.php 的 template_redirect 钩子统一强制处理
         if ( li_cw_get_option( 'li_cw_links_comments', false ) ) :
-            global $post;
-            $orig_status = $post->comment_status;
-            $post->comment_status = 'open';
-            add_filter( 'comments_open', '__return_true' );
             comments_template();
-            remove_filter( 'comments_open', '__return_true' );
-            $post->comment_status = $orig_status;
         endif;
         ?>
     </div>

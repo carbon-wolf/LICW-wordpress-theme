@@ -38,7 +38,8 @@ get_header();
 
             <?php
             $paged = get_query_var( 'paged' ) ? get_query_var( 'paged' ) : 1;
-            $photos_per_page = li_cw_get_option( 'li_cw_photos_per_page', 24 );
+            // 运行时钳制（customizer input_attrs 只是前端提示，不强制）
+            $photos_per_page = min( 100, max( 4, absint( li_cw_get_option( 'li_cw_photos_per_page', 24 ) ) ) );
             $photos = new WP_Query( array(
                 'post_type'      => 'photo',
                 'posts_per_page' => $photos_per_page,
@@ -106,8 +107,8 @@ get_header();
                         $excerpt .= '…';
                     }
 
-                    // 每张图片生成一个 masonry 卡片
-                    foreach ( $all_images as $idx => $image_id ) {
+                    // 每张图片生成一个 masonry 卡片（index 逐卡递增，保证级联动画错开）
+                    foreach ( $all_images as $image_id ) {
                         $full_url = wp_get_attachment_image_url( $image_id, 'full' );
 
                         // 按图片宽高比分配 8 单位网格 — 每张图对号入座，卡片跟着图片大小走
@@ -158,9 +159,8 @@ get_header();
                             </article>
                         </div>
             <?php
+                        $item_index++;
                     } // end foreach image
-
-                    $item_index++;
 
                     // 无图占位
                     if ( empty( $all_images ) ) {
@@ -178,6 +178,7 @@ get_header();
                             </article>
                         </div>
             <?php
+                        $item_index++;
                     }
 
                 endwhile;

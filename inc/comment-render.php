@@ -37,7 +37,7 @@ function li_cw_simple_comment( $comment, $args, $depth ) {
         <div class="comment-body">
             <div class="comment-author">
                 <?php echo get_avatar( $comment, 32 ); ?>
-                <span class="fn"><?php echo get_comment_author(); ?></span>
+                <span class="fn"><?php echo esc_html( get_comment_author() ); ?></span>
                 <?php if ( $is_post_author ) : ?>
                     <span class="comment-author-badge"><?php esc_html_e( '博主', 'li-cw' ); ?></span>
                 <?php endif; ?>
@@ -54,7 +54,7 @@ function li_cw_simple_comment( $comment, $args, $depth ) {
                 <?php endif; ?>
                 <?php
                 if ( li_cw_comment_ip_enabled() ) {
-                    $ip_loc = get_comment_meta( $comment->comment_ID, 'li_cw_ip_location', true );
+                    $ip_loc = li_cw_get_comment_ip_location( $comment->comment_ID );
                     if ( $ip_loc ) {
                         echo ' · <span class="comment-ip" title="' . esc_attr__( 'IP 属地', 'li-cw' ) . '">' . esc_html( $ip_loc ) . '</span>';
                     }
