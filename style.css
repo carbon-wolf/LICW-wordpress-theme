@@ -3,7 +3,7 @@ Theme Name: Li CW 创作主题
 Theme URI: https://github.com/carbon-wolf/LICW-wordpress-theme
 Author: 林泽凯
 Description: 极简优雅的个人创作博客主题，适配写作、作品展示
-Version: 1.1.10
+Version: 1.2.0
 License: GNU General Public License v2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: 极简, 博客, 作品集, 暗色模式, 响应式
@@ -100,6 +100,9 @@ Tags: 极简, 博客, 作品集, 暗色模式, 响应式
 
   --radius: 4px;
   --shadow-sm: 0 2px 8px oklch(0% 0 0 / 0.04);
+
+  /* 代码块专用表面 — 比纸面沉一档，形成"墨水稿纸"的独立层次 */
+  --bg-code: oklch(96.5% 0.006 95);
 }
 
 html.dark {
@@ -139,6 +142,9 @@ html.dark {
   --color-info-bg: oklch(25% 0.02 200);
 
   --shadow-sm: 0 2px 8px oklch(0% 0 0 / 0.18);
+
+  /* 暗色代码表面 — 比卡片沉一档（比页面底略沉），代码是"夜间手稿" */
+  --bg-code: oklch(15% 0.006 170);
 }
 
 /* ============================================
@@ -1702,15 +1708,16 @@ html.dark .project-status.is-gold {
 
 /* 块级代码块：大段代码（position/左侧留白为行号服务，见 §18 代码增强） */
 pre {
-    background: var(--bg-card);
+    background: var(--bg-code);
     border: 1px solid var(--border-color);
     border-radius: var(--radius);
-    padding: 16px 20px 16px 3.5em; /* 左侧给行号留位置 */
+    padding: 20px 24px 20px 3.5rem; /* 左侧行号区（与 .code-line::before rem 几何同基准） */
     margin: 1.5em 0;
     overflow-x: auto;
     tab-size: 4;
     -webkit-overflow-scrolling: touch;
     position: relative;
+    font-size: 0.9rem;
 }
 
 pre code {
@@ -1718,8 +1725,8 @@ pre code {
     background: transparent;
     border: none;
     padding: 0;
-    font-size: 0.9rem;
-    line-height: 1.65;
+    font-size: inherit;
+    line-height: 1.7;
     color: var(--text-primary);
     font-family: var(--font-code);
     white-space: pre;
@@ -1740,6 +1747,10 @@ pre::-webkit-scrollbar-thumb {
 }
 pre::-webkit-scrollbar-thumb:hover {
     background: var(--text-secondary);
+}
+pre {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
 }
 
 /* ============================================
@@ -3614,14 +3625,49 @@ hr.sep-dots::after,
     color: var(--accent-gold);
 }
 
-/* ===== 代码块增强：行号 + 复制按钮 ===== */
-/* 外层包装：作为复制按钮的定位上下文，按钮不随 pre 滚动 */
+/* ===== 代码块增强：档案编目卡 ===== */
+/* 外层包装：头部工具栏（语言标签 + 复制）+ 沉色代码面，按钮不随 pre 滚动 */
 .code-block-wrapper {
     position: relative;
-    margin: 1.5em 0;
+    margin: 1.8em 0;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    background: var(--bg-code);
+    overflow: hidden; /* 圆角裁切 + 头部底色 */
+    box-shadow: var(--shadow-sm);
 }
 .code-block-wrapper pre {
     margin: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+/* 头部工具栏：语言标签（哑金小型大写）— 由 JS 生成，无代码时整个隐藏 */
+.code-block-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-card); /* 与正文纸面同色，形成"卡头 + 沉色正文"层次 */
+    font-family: var(--font-ui);
+}
+.code-block-header:not(:has(.code-lang-label)) {
+    display: none; /* 无语言标签时不占空间（渐进增强，不识别时退回纯代码面） */
+}
+.code-lang-label {
+    font-size: var(--text-caption);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-gold-hover);
+    direction: rtl; /* 左对齐语言，右侧自然溢出省略 */
+}
+html.dark .code-lang-label {
+    color: var(--accent-gold);
 }
 
 /* 行号：基于每行span计数，100%准确 */
@@ -3632,20 +3678,37 @@ hr.sep-dots::after,
     display: block;
     counter-increment: code-line;
     position: relative;
-    min-height: 1.5em;
+    min-height: 1.7em;
 }
 .code-with-lines .code-line::before {
     content: counter(code-line);
     position: absolute;
-    left: -3em;
-    width: 2.2em;
+    left: -3.4rem; /* 几何统一 rem：不随 0.85em 缩字号漂移 */
+    width: 2.4rem; /* 右缘 -1rem，容 4 位行号 */
     text-align: right;
     color: var(--text-secondary);
-    opacity: 0.5;
+    opacity: 0.45;
     user-select: none;
     font-family: inherit;
-    font-size: 0.9em;
-    line-height: 1.65;
+    font-size: 0.85em;
+    line-height: 1.7;
+    font-variant-numeric: tabular-nums; /* 行号等宽数字，纵向对齐 */
+}
+/* 行号区与代码之间的装帧刻度线 — 位于行号右缘(-1rem)与代码起点(0)的空隙内，任何位数不压线 */
+.code-with-lines .code-line::after {
+    content: "";
+    position: absolute;
+    left: -0.55rem;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--border-color);
+    opacity: 0.6;
+}
+
+/* 行 hover 微亮 — 长代码定位行的辅助（安静，不抢戏） */
+.code-with-lines .code-line:hover {
+    background: var(--bg-card);
 }
 
 /* 兼容古腾堡代码块默认样式 */
@@ -3654,51 +3717,89 @@ hr.sep-dots::after,
     padding: 0;
     margin: 1.5em 0;
 }
-.wp-block-code code {
-    background: var(--bg-card);
+.wp-block-code pre {
+    margin: 0; /* 由 wrapper 接管间距 */
 }
 
-/* 复制按钮 — 定位在 wrapper 上，不随 pre 内部滚动而移动 */
+/* 复制按钮 — 头部工具栏右侧，幽灵态 */
 .code-copy-btn {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    padding: 4px 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
     font-size: var(--text-caption);
     font-family: var(--font-ui);
-    background: var(--bg-page);
-    border: 1px solid var(--border-color);
+    letter-spacing: 0.02em;
+    background: transparent;
+    border: 1px solid transparent;
     border-radius: 3px;
     color: var(--text-secondary);
     cursor: pointer;
-    opacity: 1;
     z-index: 5;
-    transition: all 0.2s;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+/* 复制按钮图标 — 剪影小剪本 */
+.code-copy-btn::before {
+    content: "";
+    width: 12px;
+    height: 12px;
+    background-color: currentColor;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='9' width='13' height='13' rx='2'/%3E%3Cpath d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='9' width='13' height='13' rx='2'/%3E%3Cpath d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'/%3E%3C/svg%3E");
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+}
+.code-copy-btn:hover,
+.code-copy-btn:focus-visible {
+    color: var(--accent-gold-hover);
+    border-color: var(--accent-gold);
+    background: var(--bg-code);
+}
+html.dark .code-copy-btn:hover,
+html.dark .code-copy-btn:focus-visible {
+    color: var(--accent-gold);
+}
+.code-copy-btn.is-copied {
+    color: var(--color-success);
 }
 
-/* 仅桌面端（有 hover 能力）隐藏按钮，hover wrapper 时显示 */
+/* 无语言标签时：按钮浮动在代码面右上角（hover 淡入） */
+.code-copy-btn.is-floating {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--bg-card);
+    border-color: var(--border-color);
+}
 @media (hover: hover) {
-    .code-copy-btn {
+    .code-copy-btn.is-floating {
         opacity: 0;
     }
-    .code-block-wrapper:hover .code-copy-btn,
-    .code-copy-btn:focus-visible {
+    .code-block-wrapper:hover .is-floating,
+    .code-copy-btn.is-floating:focus-visible {
         opacity: 1;
     }
 }
 
-.code-copy-btn:hover {
-    color: var(--accent-gold);
-    border-color: var(--accent-gold);
-}
-
-/* 移动端：稍大触控区域 */
+/* 移动端：头部工具栏压缩 */
 @media (max-width: 600px) {
+    .code-block-header {
+        padding: 6px 10px;
+    }
     .code-copy-btn {
-        top: 6px;
-        right: 6px;
-        padding: 6px 12px;
-        font-size: 0.75rem;
+        padding: 5px 12px; /* 稍大触控区域 */
+    }
+    pre {
+        padding: 16px 14px 16px 3.2rem;
+    }
+    .code-with-lines .code-line::before {
+        left: -3.1rem;
+        width: 2.2rem; /* 右缘 -0.9rem */
+    }
+    .code-with-lines .code-line::after {
+        left: -0.5rem;
     }
 }
 
@@ -3707,20 +3808,29 @@ hr.sep-dots::after,
     background: transparent !important;
     color: var(--text-primary) !important;
 }
-/* 浅色模式关键字配色 */
-.hljs-keyword, .hljs-selector-tag { color: #a626a4; }
-.hljs-string { color: #50a14f; }
-.hljs-number { color: #986801; }
-.hljs-comment { color: #a0a1a7; font-style: italic; }
-.hljs-function { color: #4078f2; }
-.hljs-title { color: #4078f2; }
+/* 浅色模式 — One Light 调子，色度收敛以贴合暖纸 */
+.hljs-keyword, .hljs-selector-tag, .hljs-doctag { color: #a626a4; }
+.hljs-string, .hljs-regexp, .hljs-addition { color: #50a14f; }
+.hljs-number, .hljs-literal { color: #986801; }
+.hljs-comment, .hljs-quote { color: #a0a1a7; font-style: italic; }
+.hljs-function, .hljs-title, .hljs-title.function_ { color: #4078f2; }
+.hljs-title.class_, .hljs-type, .hljs-class .hljs-title { color: #c18401; }
+.hljs-attr, .hljs-attribute, .hljs-variable, .hljs-template-variable, .hljs-property { color: #986801; }
+.hljs-symbol, .hljs-bullet, .hljs-meta, .hljs-selector-id, .hljs-selector-class, .hljs-selector-attr, .hljs-selector-pseudo { color: #e45649; }
+.hljs-built_in, .hljs-builtin-name { color: #0184bc; }
+.hljs-deletion { color: #e45649; }
 
-/* 暗色模式自动切换配色 */
-html.dark .hljs-keyword, html.dark .hljs-selector-tag { color: #c678dd; }
-html.dark .hljs-string { color: #98c379; }
-html.dark .hljs-number { color: #d19a66; }
-html.dark .hljs-comment { color: #5c6370; }
-html.dark .hljs-function { color: #61afef; }
+/* 暗色模式自动切换配色 — One Dark 调子 */
+html.dark .hljs-keyword, html.dark .hljs-selector-tag, html.dark .hljs-doctag { color: #c678dd; }
+html.dark .hljs-string, html.dark .hljs-regexp, html.dark .hljs-addition { color: #98c379; }
+html.dark .hljs-number, html.dark .hljs-literal { color: #d19a66; }
+html.dark .hljs-comment, html.dark .hljs-quote { color: #5c6370; }
+html.dark .hljs-function, html.dark .hljs-title, html.dark .hljs-title.function_ { color: #61afef; }
+html.dark .hljs-title.class_, html.dark .hljs-type, html.dark .hljs-class .hljs-title { color: #e5c07b; }
+html.dark .hljs-attr, html.dark .hljs-attribute, html.dark .hljs-variable, html.dark .hljs-template-variable, html.dark .hljs-property { color: #d19a66; }
+html.dark .hljs-symbol, html.dark .hljs-bullet, html.dark .hljs-meta, html.dark .hljs-selector-id, html.dark .hljs-selector-class, html.dark .hljs-selector-attr, html.dark .hljs-selector-pseudo { color: #e06c75; }
+html.dark .hljs-built_in, html.dark .hljs-builtin-name { color: #56b6c2; }
+html.dark .hljs-deletion { color: #e06c75; }
 
 /* ============================================
    18. 照片墙 / Photo Gallery
@@ -4386,5 +4496,4 @@ html.dark #masonry-grid .photo-card:hover .photo-thumb::after {
     top: 16px;
   }
 }
-html.dark .hljs-title { color: #61afef; }
 
