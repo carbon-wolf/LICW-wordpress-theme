@@ -27,7 +27,7 @@ function li_cw_register_shuoshuo_cpt() {
         'has_archive'         => true,
         'menu_icon'           => 'dashicons-format-status',
         'menu_position'       => 6,
-        'supports'            => array( 'title', 'editor', 'custom-fields' ),
+        'supports'            => array( 'title', 'editor', 'comments', 'custom-fields' ),
         'rewrite'             => array( 'slug' => 'shuoshuo' ),
         'show_in_nav_menus'   => true,
     );
@@ -76,3 +76,18 @@ function li_cw_handle_shuoshuo_like( $request ) {
  * 后台编辑说说时，可在自定义字段中添加：
  * li_cw_shuoshuo_mood - 心情标签（如：开心 / 思考中 / 忙碌）
  */
+
+/**
+ * 强制说说评论开放，确保每条说说都能评论
+ *
+ * @param bool $open    当前是否开放
+ * @param int  $post_id 文章 ID
+ * @return bool
+ */
+function li_cw_shuoshuo_comments_open( $open, $post_id ) {
+    if ( 'shuoshuo' === get_post_type( $post_id ) ) {
+        return true;
+    }
+    return $open;
+}
+add_filter( 'comments_open', 'li_cw_shuoshuo_comments_open', 10, 2 );

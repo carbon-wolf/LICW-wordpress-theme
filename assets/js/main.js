@@ -144,6 +144,172 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
+    // ========== 评论微信表情选择器 ==========
+    const emojiToggle = document.querySelector('.emoji-toggle');
+    const emojiPanel = document.getElementById('emojiPanel');
+    if (emojiToggle && emojiPanel) {
+        const emojiTextarea = document.getElementById('comment');
+        const emojiModal = document.getElementById('commentModal');
+        let emojiBuilt = false;
+
+        // 首次展开时才根据 JSON 生成按钮，避免每页冗余 HTML / 图片请求
+        function buildEmojiPanel() {
+            if (emojiBuilt) return;
+            emojiBuilt = true;
+
+            const dataEl = document.getElementById('liCwWxEmojiData');
+            if (!dataEl) return;
+
+            let data;
+            try {
+                data = JSON.parse(dataEl.textContent);
+            } catch (e) {
+                return;
+            }
+
+            const groups = (data && data.groups) ? data.groups : [];
+            if (!groups.length) return;
+
+            const tabs = document.createElement('span');
+            tabs.className = 'emoji-tabs';
+
+            const grids = document.createElement('span');
+            grids.className = 'emoji-grids';
+
+            const built = {};
+            let activeId = groups[0].id;
+
+            function buildGrid(group) {
+                if (built[group.id]) return;
+                built[group.id] = true;
+
+                const grid = document.createElement('span');
+                grid.className = 'emoji-grid';
+                grid.setAttribute('data-group', group.id);
+                grid.hidden = true;
+
+                const items = group.items || {};
+                Object.keys(items).forEach(function(key) {
+                    const btn = document.createElement('button');
+                    const insert = group.mode === 'token' ? (':' + key + ':') : key;
+
+                    btn.type = 'button';
+                    btn.className = 'emoji-item';
+                    btn.setAttribute('data-emoji', insert);
+                    btn.setAttribute('title', insert);
+                    btn.setAttribute('aria-label', key);
+
+                    const img = document.createElement('img');
+                    img.src = (group.base || '') + items[key] + '.png';
+                    img.alt = key;
+                    img.width = 24;
+                    img.height = 24;
+                    img.loading = 'lazy';
+
+                    btn.appendChild(img);
+                    grid.appendChild(btn);
+                });
+
+                grids.appendChild(grid);
+            }
+
+            function activate(groupId) {
+                const group = groups.find(function(g) { return g.id === groupId; });
+                if (!group) return;
+                activeId = groupId;
+                buildGrid(group);
+
+                tabs.querySelectorAll('.emoji-tab').forEach(function(t) {
+                    t.classList.toggle('is-active', t.getAttribute('data-target') === groupId);
+                });
+                grids.querySelectorAll('.emoji-grid').forEach(function(g) {
+                    g.hidden = g.getAttribute('data-group') !== groupId;
+                });
+            }
+
+            groups.forEach(function(group, idx) {
+                const tab = document.createElement('button');
+                tab.type = 'button';
+                tab.className = 'emoji-tab' + (idx === 0 ? ' is-active' : '');
+                tab.setAttribute('data-target', group.id);
+                tab.textContent = group.label || group.id;
+                tab.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    activate(group.id);
+                });
+                tabs.appendChild(tab);
+            });
+
+            emojiPanel.appendChild(tabs);
+            emojiPanel.appendChild(grids);
+            activate(activeId);
+        }
+
+        function closeEmojiPanel() {
+            emojiPanel.hidden = true;
+            emojiToggle.classList.remove('is-open');
+            emojiToggle.setAttribute('aria-expanded', 'false');
+        }
+
+        function openEmojiPanel() {
+            buildEmojiPanel();
+            emojiPanel.hidden = false;
+            emojiToggle.classList.add('is-open');
+            emojiToggle.setAttribute('aria-expanded', 'true');
+        }
+
+        emojiToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (emojiPanel.hidden) {
+                openEmojiPanel();
+            } else {
+                closeEmojiPanel();
+            }
+        });
+
+        // 点击表情 → 在光标处插入 :名称:
+        emojiPanel.addEventListener('click', function(e) {
+            const item = e.target.closest('.emoji-item');
+            if (!item || !emojiTextarea) return;
+            e.preventDefault();
+
+            const token = item.getAttribute('data-emoji') || '';
+            const val = emojiTextarea.value;
+            const start = (typeof emojiTextarea.selectionStart === 'number') ? emojiTextarea.selectionStart : val.length;
+            const end = (typeof emojiTextarea.selectionEnd === 'number') ? emojiTextarea.selectionEnd : start;
+
+            emojiTextarea.value = val.slice(0, start) + token + val.slice(end);
+            const caret = start + token.length;
+            emojiTextarea.selectionStart = emojiTextarea.selectionEnd = caret;
+            emojiTextarea.focus();
+            // 触发 input，复用现有的草稿自动保存
+            emojiTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+
+        // 点击面板/按钮以外区域关闭
+        document.addEventListener('click', function(e) {
+            if (emojiPanel.hidden) return;
+            if (emojiPanel.contains(e.target) || emojiToggle.contains(e.target)) return;
+            closeEmojiPanel();
+        });
+
+        // ESC 优先关闭表情面板
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !emojiPanel.hidden) {
+                closeEmojiPanel();
+                e.stopImmediatePropagation();
+            }
+        });
+
+        // 关闭评论弹窗时一并收起
+        const emojiCloseBtn = document.getElementById('closeCommentForm');
+        if (emojiCloseBtn) emojiCloseBtn.addEventListener('click', closeEmojiPanel);
+        const emojiMask = emojiModal ? emojiModal.querySelector('.comment-modal-mask') : null;
+        if (emojiMask) emojiMask.addEventListener('click', closeEmojiPanel);
+    }
+
     // ========== 评论表单模态框 ==========
     const openCommentBtn = document.getElementById('openCommentForm');
     const commentModal = document.getElementById('commentModal');
@@ -154,7 +320,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const cancelReplyWrap = document.getElementById('cancelReplyInModal') ? document.getElementById('cancelReplyInModal').parentNode : null;
     const defaultTitle = modalTitle ? modalTitle.textContent : '';
 
-    if (openCommentBtn && commentModal) {
+    if (commentModal) {
+        function setModalPostId(postId) {
+            var field = commentModal.querySelector('input[name="comment_post_ID"]');
+            if (field && postId) {
+                field.value = postId;
+            }
+        }
         function openModal() {
             commentModal.classList.add('is-open');
             document.body.style.overflow = 'hidden';
@@ -171,7 +343,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (cancelReplyWrap) cancelReplyWrap.style.display = 'none';
         }
 
-        openCommentBtn.addEventListener('click', openModal);
+        if (openCommentBtn) openCommentBtn.addEventListener('click', openModal);
         if (closeCommentBtn) closeCommentBtn.addEventListener('click', closeModal);
         if (commentMask) commentMask.addEventListener('click', closeModal);
 
@@ -180,6 +352,16 @@ document.addEventListener('DOMContentLoaded', function() {
             if (e.key === 'Escape' && commentModal.classList.contains('is-open')) {
                 closeModal();
             }
+        });
+
+        // 说说页：点击某条说说的评论按钮，切换评论对象并打开弹窗
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('.shuoshuo-comment-btn');
+            if (!btn) return;
+            e.preventDefault();
+            resetReplyState();
+            setModalPostId(btn.getAttribute('data-comment-post'));
+            openModal();
         });
 
         // 回复链接 — 委托监听，阻止默认 moveForm，改为打开模态框
@@ -200,6 +382,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (author) {
                 var fn = author.querySelector('.fn');
                 if (fn) authorName = fn.textContent.trim();
+            }
+
+            // 说说页：把评论对象切到该条说说
+            var scope = replyLink.closest('[data-comment-post]');
+            if (scope) {
+                setModalPostId(scope.getAttribute('data-comment-post'));
             }
 
             // 设置父评论 ID
@@ -268,68 +456,75 @@ document.addEventListener('DOMContentLoaded', function() {
         link.removeAttribute('onclick');
     });
 
-    // ========== 说说点赞 ==========
-    const LIKE_COOKIE = 'li_cw_likes';
-
-    function getLikedPosts() {
-        const match = document.cookie.match(new RegExp('(?:^|;\\s*)' + LIKE_COOKIE + '=([^;]*)'));
+    // ========== 点赞（说说 / 评论） ==========
+    function getLikedIds(cookieName) {
+        const match = document.cookie.match(new RegExp('(?:^|;\\s*)' + cookieName + '=([^;]*)'));
         if (match) {
             try { return JSON.parse(decodeURIComponent(match[1])); } catch (e) { return []; }
         }
         return [];
     }
 
-    function setLikedPosts(ids) {
+    function setLikedIds(cookieName, ids) {
         const d = new Date();
         d.setFullYear(d.getFullYear() + 1);
-        document.cookie = LIKE_COOKIE + '=' + encodeURIComponent(JSON.stringify(ids))
+        document.cookie = cookieName + '=' + encodeURIComponent(JSON.stringify(ids))
             + ';path=/;expires=' + d.toUTCString() + ';SameSite=Lax';
     }
 
-    const likedPosts = getLikedPosts();
+    function initLikeButtons(selector, idAttr, countSelector, cookieName, endpoint) {
+        const liked = getLikedIds(cookieName);
 
-    document.querySelectorAll('.like-btn').forEach(function(btn) {
-        const postId = parseInt(btn.getAttribute('data-post-id'));
-        const countEl = btn.querySelector('.like-count');
-        const initialLikes = parseInt(btn.getAttribute('data-likes')) || 0;
+        document.querySelectorAll(selector).forEach(function(btn) {
+            const id = parseInt(btn.getAttribute(idAttr));
+            if (!id) return;
+            const countEl = btn.querySelector(countSelector);
+            if (!countEl) return;
+            const initialLikes = parseInt(btn.getAttribute('data-likes')) || 0;
 
-        // 初始化计数与状态
-        countEl.textContent = initialLikes;
-        if (likedPosts.indexOf(postId) !== -1) {
-            btn.classList.add('is-liked');
-        }
-
-        btn.addEventListener('click', function() {
-            const already = btn.classList.contains('is-liked');
-            const action = already ? 'unlike' : 'like';
-
-            // 乐观更新
-            btn.classList.toggle('is-liked');
-            const currentCount = parseInt(countEl.textContent) || 0;
-            countEl.textContent = action === 'like' ? currentCount + 1 : Math.max(0, currentCount - 1);
-
-            // 更新 cookie
-            let ids = getLikedPosts();
-            if (action === 'like') {
-                if (ids.indexOf(postId) === -1) ids.push(postId);
-            } else {
-                ids = ids.filter(function(id) { return id !== postId; });
+            // 初始化计数与状态
+            countEl.textContent = initialLikes;
+            if (liked.indexOf(id) !== -1) {
+                btn.classList.add('is-liked');
             }
-            setLikedPosts(ids);
 
-            // 请求服务端
-            fetch('/wp-json/licw/v1/shuoshuo/' + postId + '/like', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: action })
-            }).catch(function() {
-                // 网络失败时回滚
+            btn.addEventListener('click', function() {
+                const already = btn.classList.contains('is-liked');
+                const action = already ? 'unlike' : 'like';
+
+                // 乐观更新
                 btn.classList.toggle('is-liked');
-                countEl.textContent = currentCount;
-                setLikedPosts(action === 'like' ? ids.filter(function(id) { return id !== postId; }) : ids.concat(postId));
+                const currentCount = parseInt(countEl.textContent) || 0;
+                countEl.textContent = action === 'like' ? currentCount + 1 : Math.max(0, currentCount - 1);
+
+                // 更新 cookie
+                let ids = getLikedIds(cookieName);
+                if (action === 'like') {
+                    if (ids.indexOf(id) === -1) ids.push(id);
+                } else {
+                    ids = ids.filter(function(x) { return x !== id; });
+                }
+                setLikedIds(cookieName, ids);
+
+                // 请求服务端
+                fetch(endpoint.replace('__ID__', id), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: action })
+                }).catch(function() {
+                    // 网络失败时回滚
+                    btn.classList.toggle('is-liked');
+                    countEl.textContent = currentCount;
+                    setLikedIds(cookieName, action === 'like' ? ids.filter(function(x) { return x !== id; }) : ids.concat(id));
+                });
             });
         });
-    });
+    }
+
+    // 说说点赞
+    initLikeButtons('.like-btn', 'data-post-id', '.like-count', 'li_cw_likes', '/wp-json/licw/v1/shuoshuo/__ID__/like');
+    // 评论点赞
+    initLikeButtons('.comment-like-btn', 'data-comment-id', '.comment-like-count', 'li_cw_comment_likes', '/wp-json/licw/v1/comment/__ID__/like');
 
     // ========== 照片墙瀑布流 (Masonry) ==========
     var masonryGrid = document.getElementById('masonry-grid');

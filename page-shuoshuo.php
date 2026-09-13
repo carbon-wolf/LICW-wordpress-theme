@@ -21,6 +21,7 @@ get_header();
             <?php
             $paged = get_query_var( 'paged' ) ? get_query_var( 'paged' ) : 1;
             $per_page = absint( li_cw_get_option( 'li_cw_shuoshuo_count', 15 ) );
+            $first_shuoshuo_id = 0;
 
             $shuoshuo = new WP_Query( array(
                 'post_type'      => 'shuoshuo',
@@ -32,6 +33,9 @@ get_header();
             if ( $shuoshuo->have_posts() ) :
                 while ( $shuoshuo->have_posts() ) :
                     $shuoshuo->the_post();
+                    if ( ! $first_shuoshuo_id ) {
+                        $first_shuoshuo_id = get_the_ID();
+                    }
                     get_template_part( 'template-parts/card-shuoshuo' );
                 endwhile;
                 wp_reset_postdata();
@@ -53,6 +57,17 @@ get_header();
                 ?>
             </div>
         <?php endif; ?>
+
+        <?php
+        // 共享评论弹窗：临时以一条说说为上下文，让 comment_form 正常输出；
+        // 实际评论对象由 JS 按点击的说说切换 comment_post_ID。
+        if ( $first_shuoshuo_id ) :
+            $GLOBALS['post'] = get_post( $first_shuoshuo_id );
+            setup_postdata( $GLOBALS['post'] );
+            get_template_part( 'template-parts/comment-modal' );
+            wp_reset_postdata();
+        endif;
+        ?>
     </div>
 </main>
 

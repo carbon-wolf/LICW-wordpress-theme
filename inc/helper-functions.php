@@ -233,6 +233,25 @@ function li_cw_force_links_comments_on_submit() {
 add_action( 'init', 'li_cw_force_links_comments_on_submit', 1 );
 
 /**
+ * 关于页强制开放评论
+ * 无论后台页面评论设置如何，关于页模板始终允许评论
+ *
+ * @param bool $open    当前是否开放
+ * @param int  $post_id 文章 ID
+ * @return bool
+ */
+function li_cw_about_comments_open( $open, $post_id ) {
+    if ( ! $post_id ) {
+        return $open;
+    }
+    if ( 'page-about.php' === get_page_template_slug( $post_id ) ) {
+        return true;
+    }
+    return $open;
+}
+add_filter( 'comments_open', 'li_cw_about_comments_open', 10, 2 );
+
+/**
  * 统计照片墙中实际展示的图片总数（含特色图、区块图片、正文内联图片）
  * 结果通过 transient 缓存，发布/删除 photo 时自动清除。
  *

@@ -453,6 +453,36 @@ function li_cw_register_customizer( $wp_customize ) {
     }
 
 
+    // ========== 4.6. 评论区设置 ==========
+    $wp_customize->add_section( 'li_cw_section_comments', array(
+        'title'    => esc_html__( '评论区设置', 'li-cw' ),
+        'priority' => 46,
+    ) );
+
+    // 评论点赞
+    $wp_customize->add_setting( 'li_cw_comments_like', array(
+        'default'           => true,
+        'sanitize_callback' => 'wp_validate_boolean',
+    ));
+    $wp_customize->add_control( 'li_cw_comments_like', array(
+        'section' => 'li_cw_section_comments',
+        'label'   => esc_html__( '显示评论点赞按钮', 'li-cw' ),
+        'type'    => 'checkbox',
+    ));
+
+    // IP 属地
+    $wp_customize->add_setting( 'li_cw_comments_ip', array(
+        'default'           => false,
+        'sanitize_callback' => 'wp_validate_boolean',
+    ));
+    $wp_customize->add_control( 'li_cw_comments_ip', array(
+        'section'     => 'li_cw_section_comments',
+        'label'       => esc_html__( '显示评论 IP 属地', 'li-cw' ),
+        'description' => esc_html__( '新评论发布时查询并显示省市；历史评论由后台定时任务逐步补全。', 'li-cw' ),
+        'type'        => 'checkbox',
+    ));
+
+
     // ========== 5.5. 说说设置 ==========
     $wp_customize->add_section( 'li_cw_section_shuoshuo', array(
         'title'       => esc_html__( '说说设置', 'li-cw' ),

@@ -75,13 +75,24 @@ $desc     = li_cw_get_option( 'li_cw_about_desc' );
                 ?>
             </div>
         </div>
-
-        <!-- 下方长文内容 - 直接输出页面编辑器内容，支持富文本、无限长度 -->
-        <?php if ( get_the_content() ) : ?>
+        <!-- 正文（支持内分页） -->
+        <?php
+        if ( have_posts() ) :
+            the_post();
+            if ( get_the_content() ) :
+        ?>
         <div class="about-content">
             <?php the_content(); ?>
+            <?php get_template_part( 'template-parts/post-pages' ); ?>
         </div>
-        <?php endif; ?>
+        <?php
+            endif;
+        endif;
+
+        if ( comments_open() || get_comments_number() ) :
+            comments_template();
+        endif;
+        ?>
     </div>
 </main>
 

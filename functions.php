@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // 主题版本号，用于缓存刷新
-define( 'LI_CW_VERSION', '1.1.9' );
+define( 'LI_CW_VERSION', '1.1.10' );
 define( 'LI_CW_THEME_DIR', get_template_directory() );
 define( 'LI_CW_THEME_URI', get_template_directory_uri() );
 
@@ -31,6 +31,11 @@ require_once LI_CW_THEME_DIR . '/inc/lightbox.php';        // 图片灯箱
 require_once LI_CW_THEME_DIR . '/inc/toc.php';             // 文章目录
 require_once LI_CW_THEME_DIR . '/inc/og-meta.php';           // Open Graph / Twitter Card
 require_once LI_CW_THEME_DIR . '/inc/link-feed.php';        // 友链文章抓取（RSS）
+require_once LI_CW_THEME_DIR . '/inc/emoji-apple.php';      // Apple 表情白名单
+require_once LI_CW_THEME_DIR . '/inc/comment-emoji.php';    // 评论/正文表情（微信 + Apple）
+require_once LI_CW_THEME_DIR . '/inc/comment-render.php';   // 评论渲染 + 说说评论列表
+require_once LI_CW_THEME_DIR . '/inc/comment-like.php';     // 评论点赞
+require_once LI_CW_THEME_DIR . '/inc/comment-ip.php';       // 评论 IP 属地
 
 /**
  * 加载主题样式与脚本

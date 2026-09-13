@@ -3,7 +3,7 @@ Theme Name: Li CW 创作主题
 Theme URI: https://github.com/carbon-wolf/LICW-wordpress-theme
 Author: 林泽凯
 Description: 极简优雅的个人创作博客主题，适配写作、作品展示
-Version: 1.1.9
+Version: 1.1.10
 License: GNU General Public License v2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: 极简, 博客, 作品集, 暗色模式, 响应式
@@ -34,6 +34,11 @@ Tags: 极简, 博客, 作品集, 暗色模式, 响应式
   --accent-gold: oklch(68% 0.09 82);
   /* 哑金加深 — 用于 hover 文字，在暖纸背景上满足 WCAG AA 对比度 */
   --accent-gold-hover: oklch(48% 0.09 82);
+  /* 文字用强调色 — 暗色下 --accent 过深不可读，文字场景统一用此变量 */
+  --text-accent: var(--accent);
+  /* 强调色 tint 底/描边 — 徽章类浅底 */
+  --accent-bg: oklch(30% 0.055 170 / 0.10);
+  --accent-border: oklch(30% 0.055 170 / 0.30);
   /* 置于强调色上的文字 — 近白，替代裸 #fff */
   --text-on-accent: oklch(95% 0.02 160);
 
@@ -116,6 +121,10 @@ html.dark {
   --accent-gold: oklch(75% 0.08 82);
   /* 暗色模式金 hover — 提亮以在深色背景上保持可见 */
   --accent-gold-hover: oklch(82% 0.07 82);
+  /* 暗色文字强调 — 提亮品牌绿（hue 170），对比度约 7:1 */
+  --text-accent: oklch(72% 0.06 170);
+  --accent-bg: oklch(72% 0.06 170 / 0.12);
+  --accent-border: oklch(72% 0.06 170 / 0.35);
   /* 置于强调色上的文字 — 近白 */
   --text-on-accent: oklch(98% 0 0 0);
 
@@ -451,7 +460,7 @@ button {
 
 .btn-text:hover::after {
   transform: translateX(3px);
-  color: var(--accent);
+  color: var(--text-accent);
 }
 
 /* ============================================
@@ -1090,10 +1099,17 @@ html.dark .project-status.is-gold {
 .shuoshuo-card-meta {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
   gap: var(--space-sm);
-  padding-right: 68px;
   font-family: var(--font-ui);
   font-size: var(--text-caption);
+}
+
+.shuoshuo-card-meta-main {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
 }
 
 .shuoshuo-card-date {
@@ -1128,13 +1144,9 @@ html.dark .project-status.is-gold {
 }
 
 .shuoshuo-card-actions {
-  position: absolute;
-  top: var(--space-lg);
-  right: 0;
-}
-
-.shuoshuo-card:first-child .shuoshuo-card-actions {
-  top: 0;
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .like-btn {
@@ -1175,6 +1187,44 @@ html.dark .project-status.is-gold {
 
 .like-btn:active .like-icon {
   transform: scale(1.25);
+}
+
+/* 说说评论按钮 — 与点赞按钮同款 */
+.shuoshuo-comment-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--text-caption);
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.shuoshuo-comment-btn:hover {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold-hover);
+}
+
+.comment-icon {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+
+/* 说说卡片内的评论列表 */
+.shuoshuo-comments {
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px dashed var(--border-color);
+}
+
+.shuoshuo-comments .comment-list {
+  margin-top: var(--space-sm);
 }
 
 .shuoshuo-empty {
@@ -1645,21 +1695,22 @@ html.dark .project-status.is-gold {
     padding: 2px 6px;
     font-size: 0.88em;
     font-family: var(--font-code);
-    color: var(--accent);
+    color: var(--text-accent);
     white-space: nowrap;
     vertical-align: 1px;
 }
 
-/* 块级代码块：大段代码 */
+/* 块级代码块：大段代码（position/左侧留白为行号服务，见 §18 代码增强） */
 pre {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius);
-    padding: 16px 20px;
+    padding: 16px 20px 16px 3.5em; /* 左侧给行号留位置 */
     margin: 1.5em 0;
     overflow-x: auto;
     tab-size: 4;
     -webkit-overflow-scrolling: touch;
+    position: relative;
 }
 
 pre code {
@@ -1689,16 +1740,6 @@ pre::-webkit-scrollbar-thumb {
 }
 pre::-webkit-scrollbar-thumb:hover {
     background: var(--text-secondary);
-}
-
-/* 兼容WordPress古腾堡代码块 */
-.wp-block-code {
-    margin: 1.5em 0;
-    border: none;
-    padding: 0;
-}
-.wp-block-code code {
-    font-family: inherit;
 }
 
 /* ============================================
@@ -1921,7 +1962,8 @@ hr.sep-dots::after,
   letter-spacing: 0.06em;
 }
 
-.post-page-num {
+.post-page-num,
+.post-pages a.post-page-numbers {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1937,7 +1979,8 @@ hr.sep-dots::after,
   transition: border-color 0.2s, color 0.2s;
 }
 
-.post-pages a.post-page-num:hover {
+.post-pages a.post-page-num:hover,
+.post-pages a.post-page-numbers:hover {
   border-color: var(--accent-gold);
   color: var(--accent-gold);
 }
@@ -1947,14 +1990,6 @@ hr.sep-dots::after,
   background: var(--accent);
   border-color: var(--accent);
   color: var(--text-on-accent);
-}
-
-.about-content code {
-  background: var(--bg-card);
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 0.9em;
-  font-family: var(--font-code);
 }
 
 /* ============================================
@@ -2498,24 +2533,8 @@ hr.sep-dots::after,
   border-radius: 0 4px 4px 0;
 }
 
-.comment-pinned-badge {
-  display: inline-flex;
-  align-items: center;
-  font-family: var(--font-ui);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--accent-gold);
-  background: oklch(68% 0.09 82 / 0.12);
-  border: 1px solid oklch(68% 0.09 82 / 0.3);
-  border-radius: 3px;
-  padding: 1px 6px;
-  margin-left: 6px;
-  vertical-align: middle;
-  line-height: 1.5;
-}
-
-/* 博主身份徽章 — 与置顶徽章 pill 结构一致，使用主色调区分 */
+/* 评论徽章 pill 公共结构 — 置顶（金）/ 博主（绿）仅配色不同 */
+.comment-pinned-badge,
 .comment-author-badge {
   display: inline-flex;
   align-items: center;
@@ -2523,14 +2542,25 @@ hr.sep-dots::after,
   font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.04em;
-  color: var(--accent);
-  background: oklch(30% 0.055 170 / 0.10);
-  border: 1px solid oklch(30% 0.055 170 / 0.30);
   border-radius: 3px;
   padding: 1px 6px;
   margin-left: 6px;
   vertical-align: middle;
   line-height: 1.5;
+}
+
+/* 置顶徽章 — 哑金 */
+.comment-pinned-badge {
+  color: var(--accent-gold);
+  background: oklch(68% 0.09 82 / 0.12);
+  border: 1px solid oklch(68% 0.09 82 / 0.3);
+}
+
+/* 博主身份徽章 — 主色调区分 */
+.comment-author-badge {
+  color: var(--text-accent);
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
 }
 
 /* 子评论头像 */
@@ -2624,6 +2654,9 @@ hr.sep-dots::after,
 }
 
 .comment-reply {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
   padding-left: 42px;
   margin-top: 6px;
 }
@@ -2653,6 +2686,41 @@ hr.sep-dots::after,
   font-family: var(--font-ui);
   font-size: var(--text-caption);
   color: var(--text-secondary);
+}
+
+/* 评论点赞按钮 */
+.comment-like-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-ui);
+  font-size: var(--text-caption);
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.comment-like-btn:hover,
+.comment-like-btn.is-liked {
+  color: var(--accent-gold-hover);
+}
+
+.comment-like-btn.is-liked .like-icon {
+  fill: var(--accent-gold);
+}
+
+.comment-like-count {
+  line-height: 1;
+}
+
+/* 评论 IP 属地 */
+.comment-ip {
+  color: var(--text-secondary);
+  opacity: 0.85;
 }
 
 /* 评论模态框 */
@@ -2686,10 +2754,12 @@ hr.sep-dots::after,
   position: relative;
   width: 90%;
   max-width: 480px;
+  max-height: 90vh;
   background: var(--bg-card);
   border-radius: var(--radius);
   box-shadow: 0 10px 40px oklch(0% 0 0 / 0.12);
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   animation: modalIn 0.2s ease;
 }
 
@@ -2816,6 +2886,134 @@ hr.sep-dots::after,
 .comment-modal-body textarea {
   min-height: 90px;
   resize: vertical;
+}
+
+/* 表情选择器（微信 + Apple） */
+.comment-input {
+  display: block;
+  position: relative;
+}
+
+.emoji-toggle {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.emoji-toggle:hover,
+.emoji-toggle.is-open {
+  opacity: 1;
+  background: var(--bg-page);
+}
+
+.emoji-toggle img {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.emoji-panel {
+  display: block;
+  margin-top: 8px;
+  padding: 0 10px 10px;
+  max-height: 200px;
+  overflow-y: auto;
+  background: var(--bg-page);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+}
+
+.emoji-panel[hidden] {
+  display: none;
+}
+
+/* 分组标签：微信 / Apple */
+.emoji-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  gap: 4px;
+  padding: 8px 0;
+  background: var(--bg-page);
+}
+
+.emoji-tab {
+  padding: 3px 10px;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-ui);
+  font-size: var(--text-caption);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.emoji-tab:hover {
+  color: var(--text-primary);
+}
+
+.emoji-tab.is-active {
+  background: var(--bg-card);
+  color: var(--accent-gold-hover);
+}
+
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(32px, 1fr));
+  gap: 4px;
+}
+
+.emoji-grid[hidden] {
+  display: none;
+}
+
+.emoji-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.emoji-item:hover {
+  background: var(--bg-card);
+  transform: translateY(-1px);
+}
+
+.emoji-item img {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+/* 评论 / 正文中的表情 */
+.li-cw-wxemoji,
+.li-cw-appleemoji {
+  width: 24px;
+  height: 24px;
+  margin: 0 1px;
+  vertical-align: -5px;
+  display: inline-block;
 }
 
 .comment-modal-body .form-submit {
@@ -3275,10 +3473,9 @@ hr.sep-dots::after,
     padding-right: 0;
   }
 
-  .shuoshuo-card-actions {
-    position: static;
-    display: flex;
-    justify-content: center;
+  .shuoshuo-card-actions .like-btn,
+  .shuoshuo-card-actions .shuoshuo-comment-btn {
+    padding: 6px 10px;
   }
 
   .toc {
@@ -3427,11 +3624,6 @@ hr.sep-dots::after,
     margin: 0;
 }
 
-pre {
-    position: relative;
-    padding-left: 3.5em; /* 给行号留位置 */
-}
-
 /* 行号：基于每行span计数，100%准确 */
 .code-with-lines {
     counter-reset: code-line;
@@ -3463,7 +3655,6 @@ pre {
     margin: 1.5em 0;
 }
 .wp-block-code code {
-    padding: 16px 20px 16px 3.5em;
     background: var(--bg-card);
 }
 
